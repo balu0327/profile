@@ -1,0 +1,994 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>M Balasubramanya</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="M Balasubramanya — Software Developer, Full-Stack, Cloud and AI applications. Bengaluru.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a two-column spec sheet. A sticky identity column on the left, a scrolling record on the right; stacks to one column on phones. */
+:root {
+  /* Single dark theme, same in light and dark mode */
+  --bg: #0a0d0b;
+  --surface: #111613;
+  --ink: #c9d6c4;         /* body text: soft off-white with a green cast */
+  --bright: #f8f8f8;      /* name and headings */
+  --muted: #8fb284;
+  --line: #232b26;
+  --accent: #5dd62c;
+  --accent-soft: #15301a;
+  --display: "Silkscreen", "IBM Plex Mono", ui-monospace, monospace;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+/* Opening loader: pure black, a green "Loading..." and a thin-framed bar that fills with
+   fine vertical stripes, dim at the start and bright at the leading edge. Site greens only. */
+#loader { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #000;
+  transition: opacity .5s ease, visibility .5s; }
+#loader.done { opacity: 0; visibility: hidden; }
+.load-box { width: min(440px, 84vw); display: grid; gap: 12px; }
+.load-label { font-family: var(--mono); font-size: 1.15rem; letter-spacing: 0.02em; color: var(--accent);
+  text-shadow: 0 0 8px rgba(93, 214, 44, 0.45); }
+.load-track { height: 40px; padding: 5px; border: 1.5px solid #f8f8f8; }
+.load-fill { height: 100%; width: 0%;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0) 92%),
+              repeating-linear-gradient(90deg, #2fd66b 0 3px, transparent 3px 6px);
+  box-shadow: 4px 0 10px -4px rgba(62, 224, 122, 0.8); }
+html.loading, html.loading body { overflow: hidden; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 1rem; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+#bits, #head, #eyes { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.wrap { position: relative; z-index: 1; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+.wrap {
+  max-width: 1120px; margin: 0 auto; padding-block: clamp(32px, 6vw, 72px);
+  display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 32px clamp(32px, 6vw, 88px);
+}
+
+/* Identity column */
+.id { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 40px); align-self: start; display: grid; gap: 24px; }
+.hero { grid-column: 1 / -1; display: grid; gap: 14px; min-width: 0; }
+/* name, location and buttons are pulled out of the centred column to the left edge of the screen */
+.wrap { --edge: min(0px, calc(clamp(16px, 3vw, 40px) - (100vw - min(1120px, 100vw - 32px)) / 2)); }
+.hero, .id { margin-left: var(--edge); }
+.name { font-family: var(--display); font-weight: 700; font-size: min(5rem, calc((100vw - 40px) / 18)); line-height: 1; letter-spacing: 0; }
+.name, .name span { color: #f8f8f8; }
+.name span { display: block; white-space: nowrap; }
+/* Pixel mailbox button */
+.mailbtn { display: inline-flex; align-items: center; gap: 10px; justify-self: start; padding: 6px 12px 6px 8px;
+  color: #f8f8f8; text-decoration: none;
+  /* glass: see-through tint, blurred backdrop, light rim and a soft top highlight */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 10px;
+  -webkit-backdrop-filter: blur(0.8px) saturate(140%); backdrop-filter: blur(0.8px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 18px rgba(0, 0, 0, 0.35);
+  font-family: "Silkscreen", var(--mono); font-size: 0.75rem; letter-spacing: 0.04em;
+  transition: border-color .15s, transform .15s, background-color .15s; }
+.mailbtn:hover, .mailbtn:focus-visible { background-color: rgba(93, 214, 44, 0.12); }
+.mailbtn svg { width: 48px; height: auto; overflow: visible; image-rendering: pixelated; }
+.mailbtn .flag, .mailbtn .env { transition: transform .2s steps(2); }
+.mailbtn:hover, .mailbtn:focus-visible { border-color: var(--accent); transform: translateY(-2px); outline: none; }
+.mailbtn:hover span, .mailbtn:focus-visible span { color: var(--accent); }
+.mailbtn:hover .flag, .mailbtn:focus-visible .flag { transform: translateY(-2px); }
+.mailbtn:hover .env, .mailbtn:focus-visible .env { transform: translateX(3px); }
+.mailbtn:active { transform: translateY(1px); }
+.pxbtns { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: fit-content; min-width: 200px; }
+.inbtn svg { width: 26px; }
+.igbtn svg { width: 26px; }
+.ghbtn svg { width: 26px; }
+.ghbtn .eyes { opacity: 0; transition: opacity .15s steps(1); }
+.ghbtn:hover .eyes, .ghbtn:focus-visible .eyes { opacity: 1; }
+.igbtn .lens rect, .igbtn .dot rect { transition: fill .15s steps(1); }
+.igbtn:hover .lens rect, .igbtn:focus-visible .lens rect { fill: #feda75; }
+.igbtn:hover .dot rect, .igbtn:focus-visible .dot rect { fill: #fd0002; }
+.inbtn .guy, .inbtn .tie { transition: transform .2s steps(2); transform-origin: 4px 6px; }
+.inbtn:hover .guy, .inbtn:focus-visible .guy { transform: translateY(-1px); }
+.inbtn:hover .tie, .inbtn:focus-visible .tie { transform: rotate(14deg); }
+/* Digital glitch: a faint green ghost always, stronger split and binary letters in bursts */
+.name { text-shadow: 2px 0 rgba(93, 214, 44, 0.28), -2px 0 rgba(26, 64, 41, 0.9); }
+.name.jolt { text-shadow: 5px 0 rgba(93, 214, 44, 0.75), -4px 0 rgba(47, 214, 107, 0.45); }
+.name .glitching { color: #5dd62c; text-align: center; text-shadow: 0 0 10px rgba(93, 214, 44, 0.6); }
+.greet { margin: 0 0 -4px; font-family: var(--display); font-size: clamp(1rem, 2vw, 1.5rem); letter-spacing: 0.06em; color: var(--accent); }
+.role { font-size: 1.1rem; color: var(--bright); margin: 0; }
+.role b { color: var(--accent); font-weight: 600; }
+.coords { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); letter-spacing: 0.04em; display: grid; gap: 2px; }
+
+/* Record column */
+/* Scroll transition: digital rain sweeps over the first screen while it is wiped away, then the radar takes over */
+#rain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+/* Radar: the second screen, a glowing dial with a rotating sweep */
+.radar-sec { position: relative; z-index: 1; height: 100vh; height: 100svh; display: grid; place-items: center; overflow: hidden; }
+/* as big as the screen allows: the dial fills the height (or the width on a tall phone) */
+#radar { width: min(100vw, 100vh); width: min(100vw, 100svh); aspect-ratio: 1; display: block; }
+.summary { font-family: var(--mono); font-size: 0.86rem; line-height: 1.7; margin: 0; color: #f8f8f8;
+  /* same glass as the buttons, sitting under them in the left column */
+  padding: 16px 18px; border-radius: 12px;
+  /* a dark smoked glass so the text stays readable over the digits */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02)), rgba(8, 12, 9, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(0.8px) saturate(140%); backdrop-filter: blur(0.8px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 6px 18px rgba(0, 0, 0, 0.35); }
+.summary em { font-style: normal; }
+
+section { display: grid; gap: 24px; min-width: 0; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.sec-head h2 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--bright); }
+.sec-head h2::before { content: "> "; color: var(--accent); }
+.sec-head small { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; }
+
+/* Experience timeline */
+.jobs { display: grid; gap: 0; }
+.job { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 24px; padding-block: 22px; border-bottom: 1px solid var(--line); }
+.job:last-child { border-bottom: 0; }
+.when { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 4px; }
+.job h3 { font-size: 1.12rem; font-weight: 600; color: var(--accent); }
+.job .meta { font-size: 0.88rem; color: var(--muted); margin: 2px 0 10px; }
+.job li::marker { color: var(--muted); }
+.job ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 64ch; }
+
+/* Projects */
+.projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.proj { background: var(--surface); border: 1px solid var(--line); padding: 22px; display: grid; gap: 10px; align-content: start; }
+.proj.lead { grid-column: 1 / -1; border-color: var(--accent); }
+.proj .tag { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.proj h3 { font-size: 1.1rem; font-weight: 600; line-height: 1.3; color: var(--bright); }
+.proj p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.modules { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.modules span { font-family: var(--mono); font-size: 0.72rem; padding: 3px 9px; border: 1px solid var(--line); color: var(--muted); }
+
+/* Skills */
+.skills { display: grid; gap: 0; }
+.skill { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 24px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.skill:last-child { border-bottom: 0; }
+.skill .k { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); padding-top: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px 14px; font-weight: 500; }
+
+/* Education + awards */
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 5vw, 56px); }
+.list { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.list li { display: grid; gap: 2px; }
+.list b { font-weight: 600; color: var(--bright); }
+.list .sub { color: var(--muted); font-size: 0.9rem; }
+.list .yr { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.prize { font-family: var(--display); font-weight: 700; font-size: 1.6rem; color: var(--accent); line-height: 1; }
+
+footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  .id { position: static; }
+}
+@media (max-width: 600px) {
+  .job, .skill { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .projects, .two { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .proj { transition: border-color .2s, transform .2s; }
+  .proj:hover { transform: translateY(-2px); border-color: var(--accent); }
+}
+</style>
+
+<div id="loader" role="status" aria-live="polite" aria-label="Loading">
+  <div class="load-box">
+    <div class="load-label">Loading<span id="load-dots">...</span></div>
+    <div class="load-track" aria-hidden="true"><div class="load-fill" id="load-fill"></div></div>
+  </div>
+</div>
+<script>
+  // The bar fills over at least ~1.8 s, holds near the end until the page has loaded, then the
+  // loader fades out and tells the intro animation to start.
+  (function () {
+    var root = document.documentElement, loader = document.getElementById("loader");
+    var fill = document.getElementById("load-fill"), dots = document.getElementById("load-dots");
+    var start = performance.now(), loaded = document.readyState === "complete", MIN = 1800, over = false;
+    root.classList.add("loading");
+    addEventListener("load", function () { loaded = true; });
+    var dotTimer = setInterval(function () { dots.textContent = ".".repeat(dots.textContent.length % 3 + 1); }, 380);
+    function finish() {
+      if (over) return; over = true; clearInterval(dotTimer);
+      fill.style.width = "100%";
+      setTimeout(function () {
+        loader.classList.add("done"); root.classList.remove("loading");
+        window.__loaderDone = true; dispatchEvent(new Event("loader:done"));
+        setTimeout(function () { loader.remove(); }, 700);
+      }, 220);
+    }
+    (function tick(now) {
+      if (over) return;
+      var t = Math.min(1, (now - start) / MIN), eased = 1 - Math.pow(1 - t, 2);
+      var p = Math.min(eased, loaded ? 1 : 0.88);
+      fill.style.width = (p * 100).toFixed(1) + "%";
+      if (p >= 1) { finish(); return; }
+      requestAnimationFrame(tick);
+    })(start);
+    setTimeout(finish, 8000);   // never hang
+  })();
+</script>
+<canvas id="bits" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="hero">
+    <p class="greet">Hi, I'm</p>
+    <h1 class="name"><span>Balasubramanya</span></h1>
+    <p class="role"><b>Software Developer</b> · Full-Stack · Cloud · AI Applications</p>
+  </header>
+  <aside class="id">
+    <div class="coords" aria-label="Location">
+      <span>BENGALURU, KARNATAKA 560056</span>
+      <span>12.97° N · 77.59° E</span>
+    </div>
+    <div class="pxbtns">
+      <a class="mailbtn" href="mailto:b2355973@gmail.com" aria-label="Send me an email">
+        <svg id="mailbox" viewBox="0 0 24 17" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        <span>Mail</span>
+      </a>
+      <a class="mailbtn inbtn" href="https://www.linkedin.com/in/m-balasubramanya" target="_blank" rel="noopener" aria-label="My LinkedIn profile (opens in a new tab)">
+        <svg id="inbadge" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        <span>LinkedIn</span>
+      </a>
+      <!-- TODO: replace the link below with your profile, e.g. https://www.instagram.com/your.username/ -->
+      <a class="mailbtn igbtn" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="My Instagram (opens in a new tab)">
+        <svg id="igbadge" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        <span>Instagram</span>
+      </a>
+      <!-- TODO: replace the link below with your profile, e.g. https://github.com/your-username -->
+      <a class="mailbtn ghbtn" href="https://github.com/" target="_blank" rel="noopener" aria-label="My GitHub (opens in a new tab)">
+        <svg id="ghbadge" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </aside>
+
+</div>
+
+<section class="radar-sec" aria-label="Radar">
+  <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
+</section>
+
+<script>
+  // Pixelated binary background: 0s and 1s drawn as 3x5 pixel glyphs; a few flip every moment.
+  // A wireframe head (img/face.png) is redrawn as a finer layer of the same digits, brightest where
+  // the image is brightest. It stays put behind the content as you scroll.
+  // The digits scatter away from the cursor and drift back once it moves on.
+  (function () {
+    var cv = document.getElementById("bits"), ctx = cv.getContext("2d");
+    var GLYPH = { 0: ["111","101","101","101","111"], 1: ["010","110","010","010","111"] };
+    var PX = 2, CW = PX * 3 + PX * 2, CH = PX * 5 + PX * 2; // glyph + gap
+    var OX = 6, OY = 6;                 // grid offset
+    var RADIUS = 90, PUSH = 34;          // cursor field size and how far digits get pushed (px)
+    var cells = [], cols = 0, rows = 0, hot = new Set();
+    // Solid dark-green tints for the field (no transparency, so the hue stays clean)
+    var TINTS = ["#0f2618", "#122e1d", "#163723", "#1a4029"];
+    var BASE_RGB = TINTS.map(hex), HOT_RGB = hex("#2fd66b");
+    function hex(h) { return [1, 3, 5].map(function (i) { return parseInt(h.substr(i, 2), 16); }); }
+    function mixRGB(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+    function css(c) { return "rgb(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + ")"; }
+    function rand() { return Math.random() < 0.3 ? -1 : (Math.random() < 0.5 ? 0 : 1); }
+
+    // ---- Head: a wireframe face sampled from an image and drawn as tiny digits on its own layer ----
+    var face = { x: 0, y: 0, s: 1 }, burst = false;
+    var hv = document.createElement("canvas"), hctx = hv.getContext("2d");
+    hv.id = "head"; hv.setAttribute("aria-hidden", "true"); cv.after(hv);
+    var HSX = 4, HSY = 6;                                   // fine digit step: 3x5 glyph + 1px gap
+    var LOW = hex("#123a1e"), HIGH = hex("#86e870");   // kept mid-bright so text on top stays readable
+    var head = [], hiddenIdx = [], headImg = new Image(), box = { x0: 0, y0: 0, S: 0 };
+    headImg.onload = function () { buildHead(); hiddenIdx.forEach(draw); drawHead(); drawEyes(); };
+    headImg.src = "img/face.png";
+    // The head fills the screen: as tall as the viewport, centred, sitting behind the content.
+    function placeFace(w, h) {
+      box.S = Math.round(h * 1.02); box.x0 = Math.round((w - box.S) / 2); box.y0 = Math.round((h - box.S) / 2);
+      face.s = box.S / 2.45; face.x = w / 2; face.y = h / 2;
+    }
+    function buildHead() {
+      head = []; hiddenIdx.forEach(function (i) { if (cells[i]) cells[i].hide = false; }); hiddenIdx = [];
+      if (!headImg.complete || !headImg.naturalWidth || box.S < 10) return;
+      var S = box.S, off = document.createElement("canvas"); off.width = S; off.height = S;
+      var octx = off.getContext("2d"); octx.drawImage(headImg, 0, 0, S, S);
+      var data = octx.getImageData(0, 0, S, S).data;
+      function lum(x, y) {                                  // brightness 0..1 around (x, y); the neck fades out
+        x = Math.max(0, Math.min(S - 1, Math.round(x))); y = Math.max(0, Math.min(S - 1, Math.round(y)));
+        var g = data[(y * S + x) * 4 + 1], l = Math.max(0, Math.min(1, (g - 35) / 170));
+        var v = y / S; if (v > 0.84) l *= Math.max(0, 1 - (v - 0.84) / 0.16);
+        return l;
+      }
+      for (var y = 0; y + 5 <= S; y += HSY) for (var x = 0; x + 3 <= S; x += HSX) {
+        var l = (lum(x + 1, y + 1) + lum(x + 1, y + 3) + lum(x + 2, y + 2)) / 3;
+        if (l > 0.07) head.push({ x: box.x0 + x, y: box.y0 + y, l: l, v: Math.random() < 0.5 ? 0 : 1 });
+      }
+      // hide the coarse background digits that sit inside the head's silhouette
+      var c0 = Math.max(0, Math.floor((box.x0 - OX) / CW)), c1 = Math.min(cols - 1, Math.ceil((box.x0 + S - OX) / CW));
+      var r0 = Math.max(0, Math.floor((box.y0 - OY) / CH)), r1 = Math.min(rows - 1, Math.ceil((box.y0 + S - OY) / CH));
+      for (var r = r0; r <= r1; r++) for (var c = c0; c <= c1; c++) {
+        var px = c * CW + OX + PX * 1.5 - box.x0, py = r * CH + OY + PX * 2.5 - box.y0;
+        if (px < 0 || py < 0 || px >= S || py >= S) continue;
+        if (lum(px, py) > 0.1 || lum(px - 4, py) > 0.1 || lum(px + 4, py) > 0.1) { cells[r * cols + c].hide = true; hiddenIdx.push(r * cols + c); }
+      }
+    }
+    function headColor(n) { return css(mixRGB(LOW, HIGH, Math.pow(n.l, 1.3))); }
+    function paintHeadDigit(n) {
+      hctx.fillStyle = headColor(n);
+      var g = GLYPH[n.v];
+      for (var r = 0; r < 5; r++) for (var k = 0; k < 3; k++) if (g[r][k] === "1") hctx.fillRect(n.x + k, n.y + r, 1, 1);
+    }
+    function drawHead() {
+      hctx.clearRect(0, 0, innerWidth, innerHeight);
+      if (!burst) head.forEach(paintHeadDigit);
+    }
+    function flickerHead(count) {
+      if (burst || !head.length) return;
+      for (var n = 0; n < count; n++) {
+        var d = head[Math.floor(Math.random() * head.length)]; d.v = 1 - d.v;
+        hctx.clearRect(d.x, d.y, 3, 5); paintHeadDigit(d);
+      }
+    }
+
+    // ---- Motion like the old robot: red pupils follow the cursor, the head leans toward it, and it blinks ----
+    var ev = document.createElement("canvas"), ectx = ev.getContext("2d");
+    ev.id = "eyes"; ev.setAttribute("aria-hidden", "true"); hv.after(ev);
+    var EYES = [{ u: 0.425, v: 0.492 }, { u: 0.725, v: 0.492 }];   // eye centres as a fraction of the image
+    var look = { x: 0, y: 0 }, lean = { x: 0, y: 0, tx: 0, ty: 0 }, blinking = false, eyeBox = null, leanRun = false;
+    function drawEyes() {
+      if (eyeBox) ectx.clearRect(eyeBox.x - 2, eyeBox.y - 2, eyeBox.w + 4, eyeBox.h + 4);
+      if (burst || !head.length) { eyeBox = null; return; }
+      var S = box.S, rx = S * 0.07, ry = S * 0.035, pr = S * 0.02;
+      eyeBox = { x: box.x0 + EYES[0].u * S - rx - 4, y: box.y0 + EYES[0].v * S - ry - 4, w: (EYES[1].u - EYES[0].u) * S + rx * 2 + 8, h: ry * 2 + 8 };
+      EYES.forEach(function (e) {
+        var cx = box.x0 + e.u * S, cy = box.y0 + e.v * S;
+        if (blinking) {                                      // closed: a dark lid with one bright lash line
+          ectx.fillStyle = "#0a0d0b"; ectx.fillRect(Math.round(cx - rx), Math.round(cy - ry), Math.round(rx * 2), Math.round(ry * 2));
+          ectx.fillStyle = "#9dff7a"; ectx.fillRect(Math.round(cx - rx * 0.8), Math.round(cy), Math.round(rx * 1.6), 1);
+          return;
+        }
+        var px = cx + look.x * rx * 0.45, py = cy + look.y * ry * 0.45;
+        ectx.fillStyle = "#fd0002";
+        for (var y = py - pr; y <= py + pr; y += HSY) for (var x = px - pr; x <= px + pr; x += HSX) {
+          if (Math.hypot(x - px, y - py) > pr) continue;
+          var g = GLYPH[(Math.round(x) + Math.round(y)) % 2 ? 1 : 0];
+          for (var r = 0; r < 5; r++) for (var k = 0; k < 3; k++) if (g[r][k] === "1") ectx.fillRect(Math.round(x) + k, Math.round(y) + r, 1, 1);
+        }
+      });
+    }
+    function lookAt(x, y) {
+      var dx = x - face.x, dy = y - face.y, len = Math.hypot(dx, dy) || 1, reach = Math.min(1, len / 300);
+      look.x = dx / len * reach; look.y = dy / len * reach;
+      lean.tx = look.x * 14; lean.ty = look.y * 9;            // the whole head leans a few pixels toward the cursor
+      drawEyes();
+      if (!leanRun) { leanRun = true; requestAnimationFrame(stepLean); }
+    }
+    function stepLean() {
+      lean.x += (lean.tx - lean.x) * 0.15; lean.y += (lean.ty - lean.y) * 0.15;
+      var tr = "translate(" + lean.x.toFixed(2) + "px," + lean.y.toFixed(2) + "px)";
+      hv.style.transform = tr; ev.style.transform = tr;
+      if (Math.abs(lean.tx - lean.x) + Math.abs(lean.ty - lean.y) > 0.05) requestAnimationFrame(stepLean); else leanRun = false;
+    }
+    addEventListener("pointermove", function (e) { lookAt(e.clientX, e.clientY); }, { passive: true });
+
+    function draw(i) {
+      var c = cells[i], x = (i % cols) * CW + OX, y = Math.floor(i / cols) * CH + OY;
+      if (!c.ox && !c.oy) ctx.clearRect(x, y, PX * 3, PX * 5);
+      paint(i);
+    }
+    // Paints a cell at its (possibly pushed) position without clearing anything
+    function paint(i) {
+      var c = cells[i], x = (i % cols) * CW + OX + c.ox, y = Math.floor(i / cols) * CH + OY + c.oy;
+      if ((c.hide && !burst) || c.v < 0) return;
+      var push = Math.hypot(c.ox, c.oy) / PUSH, col = BASE_RGB[c.a];
+      if (push > 0.05) col = mixRGB(col, HOT_RGB, Math.min(0.85, push * 1.4));
+      ctx.fillStyle = css(col);
+      var g = GLYPH[c.v];
+      for (var r = 0; r < 5; r++) for (var k = 0; k < 3; k++)
+        if (g[r][k] === "1") ctx.fillRect(Math.round(x) + k * PX, Math.round(y) + r * PX, PX, PX);
+    }
+    function build() {
+      var dpr = window.devicePixelRatio || 1, w = innerWidth, h = innerHeight;
+      cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      hv.width = w * dpr; hv.height = h * dpr; hctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ev.width = w * dpr; ev.height = h * dpr; ectx.setTransform(dpr, 0, 0, dpr, 0, 0); eyeBox = null;
+      cols = Math.ceil(w / CW); rows = Math.ceil(h / CH); cells = []; hot.clear(); hiddenIdx = [];
+      placeFace(w, h);
+      for (var i = 0; i < cols * rows; i++)
+        cells.push({ v: rand(), a: Math.floor(Math.random() * TINTS.length), ox: 0, oy: 0, hide: false });
+      buildHead();
+      for (var j = 0; j < cells.length; j++) draw(j);
+      drawHead(); drawEyes();
+    }
+    build();
+    var t; addEventListener("resize", function () { clearTimeout(t); t = setTimeout(build, 150); });
+    // the identity column moves during the intro, so place the head again once it has settled
+    setTimeout(build, 1800);
+
+
+    // ---- Cursor field: digits are pushed away from the cursor and drift back when it leaves ----
+    var mx = -9999, my = -9999, moved = false, running = false, prev = null;
+    function frame() {
+      moved = false;
+      // cells under the cursor join the active set
+      var m = RADIUS + PUSH;
+      var c0 = Math.max(0, Math.floor((mx - m - OX) / CW)), c1 = Math.min(cols - 1, Math.ceil((mx + m - OX) / CW));
+      var r0 = Math.max(0, Math.floor((my - m - OY) / CH)), r1 = Math.min(rows - 1, Math.ceil((my + m - OY) / CH));
+      for (var r = r0; r <= r1; r++) for (var c = c0; c <= c1; c++) hot.add(r * cols + c);
+      // ease every active cell toward its pushed-out spot (or back home)
+      var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, changed = false;
+      hot.forEach(function (i) {
+        var cell = cells[i], hx = (i % cols) * CW + OX, hy = Math.floor(i / cols) * CH + OY;
+        var ddx = hx + PX * 1.5 - mx, ddy = hy + PX * 2.5 - my, d = Math.hypot(ddx, ddy), tx = 0, ty = 0;
+        if (d < RADIUS) {
+          var k = 1 - d / RADIUS, out = PUSH * k * k;   // pushed further the closer it is: leaves a hole
+          if (d < 0.5) { ddx = 1; ddy = 0; d = 1; }
+          tx = ddx / d * out; ty = ddy / d * out;
+        }
+        if (Math.abs(tx - cell.ox) + Math.abs(ty - cell.oy) > 0.1) changed = true;
+        cell.ox += (tx - cell.ox) * 0.22; cell.oy += (ty - cell.oy) * 0.22;
+        if (d >= RADIUS && Math.abs(cell.ox) < 0.3 && Math.abs(cell.oy) < 0.3) { cell.ox = 0; cell.oy = 0; hot.delete(i); }
+        x0 = Math.min(x0, hx - PUSH); y0 = Math.min(y0, hy - PUSH);
+        x1 = Math.max(x1, hx + CW + PUSH); y1 = Math.max(y1, hy + CH + PUSH);
+      });
+      // repaint the area that changed (this frame's and last frame's)
+      var box = x0 < x1 ? { x0: x0, y0: y0, x1: x1, y1: y1 } : null, area = box;
+      if (prev) area = box ? { x0: Math.min(box.x0, prev.x0), y0: Math.min(box.y0, prev.y0), x1: Math.max(box.x1, prev.x1), y1: Math.max(box.y1, prev.y1) } : prev;
+      if (area) {
+        ctx.save(); ctx.beginPath(); ctx.rect(area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0); ctx.clip();
+        ctx.clearRect(area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0);
+        var a0 = Math.max(0, Math.floor((area.x0 - PUSH - OX) / CW)), a1 = Math.min(cols - 1, Math.ceil((area.x1 + PUSH - OX) / CW));
+        var b0 = Math.max(0, Math.floor((area.y0 - PUSH - OY) / CH)), b1 = Math.min(rows - 1, Math.ceil((area.y1 + PUSH - OY) / CH));
+        for (var rr = b0; rr <= b1; rr++) for (var cc = a0; cc <= a1; cc++) paint(rr * cols + cc);
+        ctx.restore();
+      }
+      prev = box;
+      // keep animating while digits are still moving; stop once they settle
+      if (changed || moved) requestAnimationFrame(frame); else { running = false; prev = null; }
+    }
+    function onMove(e) {
+      mx = e.clientX; my = e.clientY; moved = true;
+      if (!running) { running = true; requestAnimationFrame(frame); }
+    }
+    addEventListener("pointermove", onMove, { passive: true });
+    addEventListener("pointerdown", onMove, { passive: true });
+    document.addEventListener("pointerleave", function () { onMove({ clientX: -9999, clientY: -9999 }); });
+
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Blink every few seconds
+    (function scheduleBlink() {
+      setTimeout(function () {
+        if (!document.hidden && !burst) {
+          blinking = true; drawEyes();
+          setTimeout(function () { blinking = false; drawEyes(); }, 160);
+        }
+        scheduleBlink();
+      }, 2500 + Math.random() * 3000);
+    })();
+
+    // Idle flicker
+    setInterval(function () {
+      if (document.hidden) return;
+      for (var n = 0; n < 16; n++) {
+        var i = Math.floor(Math.random() * cells.length), c = cells[i];
+        c.v = rand();
+        if (!hot.has(i)) draw(i);
+      }
+      flickerHead(12);
+    }, 200);
+  })();
+</script>
+<!-- GSAP: local copies from your download (gsap-public/minified) -->
+<script>
+  // Draw the pixel mailbox: one <rect> per pixel from a character map
+  (function () {
+    var svg = document.getElementById("mailbox"); if (!svg) return;
+    var MAP = [
+      "...........KKKKK........",
+      "...........KRRRK........",
+      "...........KRRRK........",
+      "....KKKKKKKKKPKKKKKK....",
+      "...KBBBBBBBBBPBBBBBBK...",
+      "..KBLLBBBBBBBPBBBBBBBK..",
+      ".KBLBBBBBBBBBPBBBBBKKKKK",
+      ".KBLBBBBBBBBBPBBBBKGGGGK",
+      ".KBBBBBBBBBBBPBBBKGgGGgK",
+      ".KBBBBBBBBBBBBBBBKGGggGK",
+      ".KbBBBBBBBBBBBBBBKGGGGGK",
+      ".KbbBBBBBBBBBBBBBBKKKKKK",
+      ".KbbbbbbbbbbbbbbbbbbbbK.",
+      ".KKKKKKKKKKKKKKKKKKKKKK.",
+      ".........KSSK...........",
+      ".........KSSK...........",
+      ".........KKKK..........."
+    ];
+    var COL = { K: "#05080d", B: "#3d8bff", b: "#2a62c9", L: "#9cc4ff", R: "#fd0002", P: "#05080d", G: "#b5e05a", g: "#5d7f1e", S: "#3d8bff" };
+    var NS = "http://www.w3.org/2000/svg", flag = document.createElementNS(NS, "g"), env = document.createElementNS(NS, "g"), body = document.createElementNS(NS, "g");
+    flag.setAttribute("class", "flag"); env.setAttribute("class", "env");
+    MAP.forEach(function (row, y) {
+      for (var x = 0; x < row.length; x++) {
+        var ch = row[x]; if (ch === ".") continue;
+        var r = document.createElementNS(NS, "rect");
+        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1); r.setAttribute("fill", COL[ch]);
+        (y < 3 ? flag : (x >= 17 && y >= 6 && y <= 11 && ch !== "B" ? env : body)).appendChild(r);
+      }
+    });
+    svg.appendChild(body); svg.appendChild(env); svg.appendChild(flag);
+
+    // LinkedIn badge: the "i" is a little person in a red tie, the "n" beside it
+    var inSvg = document.getElementById("inbadge"); if (!inSvg) return;
+    var IN = [
+      "BBBBBBBBBBBBBBBB",
+      "BBBKKKBBBBBBBBBB",
+      "BBKWWWKBBBBBBBBB",
+      "BBKWWWKBBBBBBBBB",
+      "BBBKKKBBBBBBBBBB",
+      "BBKKKKKBKKKKKKBB",
+      "BBKWRWKBKWWWWWKB",
+      "BBKWRWKBKWWWWWKB",
+      "BBKWRWKBKWWKWWKB",
+      "BBKRRrKBKWWKWWKB",
+      "BBKWRWKBKWWKWWKB",
+      "BBKWWWKBKWWKWWKB",
+      "BBKWWWKBKWWKWWKB",
+      "BBKKKKKBKKKKKKKB",
+      "BBBBBBBBBBBBBBBB",
+      "BBBBBBBBBBBBBBBB"
+    ];
+    var INCOL = { B: "#2d6fb4", W: "#f8f8f8", K: "#05080d", R: "#fd0002", r: "#a80001" };
+    var bg = document.createElementNS(NS, "g"), guy = document.createElementNS(NS, "g"), tie = document.createElementNS(NS, "g"), n = document.createElementNS(NS, "g");
+    guy.setAttribute("class", "guy"); tie.setAttribute("class", "tie");
+    IN.forEach(function (row, y) {
+      for (var x = 0; x < row.length; x++) {
+        var ch = row[x], r = document.createElementNS(NS, "rect");
+        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1); r.setAttribute("fill", INCOL[ch]);
+        (ch === "B" ? bg : (ch === "R" || ch === "r") ? tie : x <= 6 ? guy : n).appendChild(r);
+      }
+    });
+    guy.appendChild(tie); inSvg.appendChild(bg); inSvg.appendChild(n); inSvg.appendChild(guy);
+
+    // Instagram badge: a pixel camera on the yellow-to-purple gradient, drawn as diagonal pixel bands
+    var igSvg = document.getElementById("igbadge"); if (!igSvg) return;
+    var IG = [
+      "..KKKKKKKKKKKK..",
+      ".KGGGGGGGGGGGGK.",
+      "KGGGGGGGGGGGGGGK",
+      "KGGWWWWWWWWWWGGK",
+      "KGGWGGGGGGGDGWGK",
+      "KGGWGGGLLGGGGWGK",
+      "KGGWGGLGGLGGGWGK",
+      "KGGWGLGGGGLGGWGK",
+      "KGGWGLGGGGLGGWGK",
+      "KGGWGGLGGLGGGWGK",
+      "KGGWGGGLLGGGGWGK",
+      "KGGWGGGGGGGGGWGK",
+      "KGGWWWWWWWWWWWGK",
+      "KGGGGGGGGGGGGGGK",
+      ".KGGGGGGGGGGGGK.",
+      "..KKKKKKKKKKKK.."
+    ];
+    var BANDS = ["#feda75", "#fa7e1e", "#d62976", "#962fbf", "#4f5bd5"];
+    var igBg = document.createElementNS(NS, "g"), lens = document.createElementNS(NS, "g"), dot = document.createElementNS(NS, "g");
+    lens.setAttribute("class", "lens"); dot.setAttribute("class", "dot");
+    IG.forEach(function (row, y) {
+      for (var x = 0; x < row.length; x++) {
+        var ch = row[x]; if (ch === ".") continue;
+        var fill = ch === "K" ? "#05080d" : ch === "G" ? BANDS[Math.min(4, Math.floor((x + 15 - y) / 6.2))] : "#f8f8f8";
+        var r = document.createElementNS(NS, "rect");
+        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1); r.setAttribute("fill", fill);
+        (ch === "L" ? lens : ch === "D" ? dot : igBg).appendChild(r);
+      }
+    });
+    igSvg.appendChild(igBg); igSvg.appendChild(lens); igSvg.appendChild(dot);
+
+    // GitHub badge: a pixel cat silhouette cut out of a white disc; its eyes light up green on hover
+    var ghSvg = document.getElementById("ghbadge"); if (!ghSvg) return;
+    var GH = [
+      ".....WWWWWW.....",
+      "...WWWWWWWWWW...",
+      "..WWWKWWWWKWWW..",
+      ".WWWKKKKKKKKWWW.",
+      ".WWKKKKKKKKKKWW.",
+      "WWWKKKKKKKKKKWWW",
+      "WWWKKEKKKKEKKWWW",
+      "WWWKKKKKKKKKKWWW",
+      "WWWKKKKKKKKKKWWW",
+      "WWWWKKKKKKKKWWWW",
+      ".WKWWWKKKKWWWWW.",
+      ".WWKKKKKKKWWWWW.",
+      "..WWWWKKKKWWWW..",
+      "...WWWKKKKWWW...",
+      ".....WKKKKW.....",
+      "................"
+    ];
+    var ghBody = document.createElementNS(NS, "g"), eyes = document.createElementNS(NS, "g");
+    eyes.setAttribute("class", "eyes");
+    GH.forEach(function (row, y) {
+      for (var x = 0; x < row.length; x++) {
+        var ch = row[x]; if (ch === ".") continue;
+        var r = document.createElementNS(NS, "rect");
+        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1);
+        r.setAttribute("fill", ch === "W" ? "#f8f8f8" : "#0d120f");
+        ghBody.appendChild(r);
+        if (ch === "E") { var e = r.cloneNode(); e.setAttribute("fill", "#5dd62c"); eyes.appendChild(e); }
+      }
+    });
+    ghSvg.appendChild(ghBody); ghSvg.appendChild(eyes);
+  })();
+</script>
+<script>
+  // Radar dial: a glowing bezel with degree marks, rings, a grid and crosshairs, a sweep that
+  // turns clockwise every 4 s, and skill targets that the sweep finds and labels one by one.
+  (function () {
+    var cv = document.getElementById("radar"); if (!cv) return;
+    var ctx = cv.getContext("2d"), still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var S = 0, dpr = 1, base = null, visible = false, raf = 0, PERIOD = 6500, builtFor = "", scanStart = null;   // one sweep every 6.5 s
+    // Seeded random numbers, so a rebuild (resize, fonts arriving, a phone's address bar)
+    // lays the skills, terrain and speckle out exactly as before instead of jumping.
+    function seeded(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    var land = null, lit = null, litCtx = null, crt = null, PING = 3200;
+    // Every skill is a target on the scope. The sweep "finds" each one the first time it passes:
+    // the blip flashes, a lock-on bracket closes round it and its name appears; after that it
+    // stays on screen, dimmer, and lights up again on every pass. A readout counts the finds.
+    var SKILLS = ["Python", "Java", "JavaScript", "SQL", "C", "C++", "React.js", "Node.js", "REST APIs", "HTML",
+                  "CSS", "PostgreSQL", "MySQL", "Supabase", "AWS", "Google Cloud", "Vercel", "Render", "Git",
+                  "GitHub", "Power BI", "Excel", "PowerPoint", "Canva", "Photoshop"];
+    var blips = SKILLS.map(function (name) { return { name: name, a: 0, r: 0.5, found: still, foundAt: 0 }; });
+    // Lay the targets out so no two labels overlap and every label stays inside the scope:
+    // try spots spread round the dial and keep the first whose label box is clear.
+    function placeBlips() {
+      var rnd = seeded(2026);
+      var c = S / 2, R = S * 0.45, fs = Math.max(11, S * 0.017), boxes = [];
+      var m = document.createElement("canvas").getContext("2d");
+      m.font = "500 " + fs + "px 'IBM Plex Mono', monospace";
+      blips.forEach(function (b, i) {
+        var w = m.measureText(b.name).width, h = fs * 1.3, pad = S * 0.012, best = null;
+        for (var t = 0; t < 400 && !best; t++) {
+          var a = (i / blips.length) * Math.PI * 2 + (rnd() - 0.5) * (t < 150 ? 0.5 : Math.PI * 2);
+          var r = 0.22 + rnd() * 0.68, ang = a - Math.PI / 2;
+          var x = c + Math.cos(ang) * R * r, y = c + Math.sin(ang) * R * r, left = x > c;
+          var gap = S * 0.026, x0 = left ? x - gap - w : x - S * 0.016, x1 = left ? x + S * 0.016 : x + gap + w;
+          var rect = [x0 - pad, y - h / 2 - pad, x1 + pad, y + h / 2 + pad];
+          var inside = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]]
+            .every(function (q) { return Math.hypot(q[0] - c, q[1] - c) < R * 0.94; });
+          var clear = boxes.every(function (o) { return rect[2] < o[0] || rect[0] > o[2] || rect[3] < o[1] || rect[1] > o[3]; });
+          if (inside && clear) best = { a: a, r: r, rect: rect };
+        }
+        if (!best) best = { a: (i / blips.length) * Math.PI * 2, r: 0.6, rect: [0, 0, 0, 0] };
+        b.a = best.a; b.r = best.r; boxes.push(best.rect);
+      });
+    }
+    function rad(deg) { return (deg - 90) * Math.PI / 180; }      // 0 at the top, clockwise
+
+    // Inside-the-scope effects, built once per size:
+    //  land  - patchy "terrain" echoes made of phosphor dots, only lit where the sweep has just passed
+    //  crt   - fine scanlines plus a vignette and a soft centre glow, laid over everything inside
+    function buildFx() {
+      var rnd = seeded(77);
+      var c = S / 2, R = S * 0.45;
+      land = document.createElement("canvas"); land.width = S * dpr; land.height = S * dpr;
+      var g = land.getContext("2d"); g.scale(dpr, dpr);
+      var blobs = [];
+      for (var b = 0; b < 7; b++) {
+        var ba = rnd() * Math.PI * 2, br = Math.sqrt(rnd()) * R * 0.8;
+        blobs.push({ x: c + Math.cos(ba) * br, y: c + Math.sin(ba) * br, r: R * (0.12 + rnd() * 0.22) });
+      }
+      g.fillStyle = "rgba(140, 255, 100, 0.9)";
+      for (var n = 0; n < S * 22; n++) {
+        var bl = blobs[n % blobs.length], a = rnd() * Math.PI * 2, d = Math.pow(rnd(), 0.7) * bl.r;
+        var x = bl.x + Math.cos(a) * d * (1 + 0.4 * Math.sin(a * 3 + n)), y = bl.y + Math.sin(a) * d;
+        if (Math.hypot(x - c, y - c) < R - 2) g.fillRect(x, y, 1.2, 1.2);
+      }
+      lit = document.createElement("canvas"); lit.width = S * dpr; lit.height = S * dpr;
+      litCtx = lit.getContext("2d");
+      crt = document.createElement("canvas"); crt.width = S * dpr; crt.height = S * dpr;
+      var k = crt.getContext("2d"); k.scale(dpr, dpr);
+      k.save(); k.beginPath(); k.arc(c, c, R, 0, Math.PI * 2); k.clip();
+      var glow = k.createRadialGradient(c, c, 0, c, c, R);
+      glow.addColorStop(0, "rgba(93, 214, 44, 0.10)"); glow.addColorStop(0.55, "rgba(93, 214, 44, 0.02)");
+      glow.addColorStop(0.85, "rgba(0, 0, 0, 0.12)"); glow.addColorStop(1, "rgba(0, 0, 0, 0.45)");
+      k.fillStyle = glow; k.fillRect(0, 0, S, S);
+      k.fillStyle = "rgba(0, 0, 0, 0.22)";
+      for (var y = 0; y < S; y += 3) k.fillRect(0, y, S, 1);
+      k.restore();
+    }
+
+    // Classic scope look: a square grid across the whole screen, thin double rim with small ticks,
+    // three range rings, an X of diagonals, a faint speckle, and a bright wedge sweeping round.
+    function drawBase() {
+      var rnd = seeded(5);
+      base = document.createElement("canvas"); base.width = S * dpr; base.height = S * dpr;
+      var g = base.getContext("2d"); g.scale(dpr, dpr);
+      var c = S / 2, R = S * 0.45, LINE = "rgba(93, 214, 44, 0.85)";
+      // square grid over the whole dial area, softer outside the scope
+      g.strokeStyle = "rgba(93, 214, 44, 0.22)"; g.lineWidth = 1;
+      var step = S / 11;
+      for (var x = (c % step); x <= S; x += step) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, S); g.stroke(); }
+      for (var y = (c % step); y <= S; y += step) { g.beginPath(); g.moveTo(0, y); g.lineTo(S, y); g.stroke(); }
+      // the scope face: dark, still see-through
+      g.fillStyle = "rgba(0, 12, 2, 0.45)"; g.beginPath(); g.arc(c, c, R, 0, Math.PI * 2); g.fill();
+      g.save(); g.beginPath(); g.arc(c, c, R, 0, Math.PI * 2); g.clip();
+      g.strokeStyle = "rgba(93, 214, 44, 0.3)";
+      for (x = (c % step); x <= S; x += step) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, S); g.stroke(); }
+      for (y = (c % step); y <= S; y += step) { g.beginPath(); g.moveTo(0, y); g.lineTo(S, y); g.stroke(); }
+      // faint phosphor speckle
+      g.fillStyle = "rgba(93, 214, 44, 0.16)";
+      for (var n = 0; n < S * 3; n++) { var a0 = rnd() * Math.PI * 2, r0 = Math.sqrt(rnd()) * R; g.fillRect(c + Math.cos(a0) * r0, c + Math.sin(a0) * r0, 1, 1); }
+      // range rings and the X of diagonals
+      g.strokeStyle = LINE; g.lineWidth = 1.5;
+      [0.3, 0.6, 0.9].forEach(function (k) { g.beginPath(); g.arc(c, c, R * k, 0, Math.PI * 2); g.stroke(); });
+      [45, 135].forEach(function (d) {
+        var a = rad(d); g.beginPath(); g.moveTo(c - Math.cos(a) * R, c - Math.sin(a) * R); g.lineTo(c + Math.cos(a) * R, c + Math.sin(a) * R); g.stroke();
+      });
+      g.restore();
+      // thin double rim with small ticks between
+      g.strokeStyle = LINE; g.lineWidth = 1.5;
+      g.beginPath(); g.arc(c, c, R, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.arc(c, c, R + S * 0.018, 0, Math.PI * 2); g.stroke();
+      g.lineWidth = 1;
+      for (var t = 0; t < 360; t += 5) {
+        var at = rad(t), t0 = R + S * 0.004, t1 = R + S * (t % 15 === 0 ? 0.016 : 0.01);
+        g.beginPath(); g.moveTo(c + Math.cos(at) * t0, c + Math.sin(at) * t0); g.lineTo(c + Math.cos(at) * t1, c + Math.sin(at) * t1); g.stroke();
+      }
+    }
+
+    function frame(now) {
+      var c = S / 2, R = S * 0.45;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, S, S);
+      ctx.drawImage(base, 0, 0, S, S);
+      // The scan only starts once the radar has scrolled fully into view (the scroll transition
+      // fades it in): from then the sweep starts at 000 and the skills are found in order.
+      if (scanStart === null && !still) {
+        // both: the fade-in has finished, and the radar's screen is really in view (scrolled down to)
+        var sec = cv.parentElement.getBoundingClientRect();
+        var shown = cv.style.opacity !== "" && parseFloat(cv.style.opacity) > 0.95;
+        if (shown && scrollY > 0 && sec.top < innerHeight * 0.25) scanStart = now;
+      }
+      var sweep = still ? rad(300) : rad((((scanStart === null ? 0 : now - scanStart) % PERIOD) / PERIOD) * 360);
+      ctx.save(); ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.clip();
+      // the sweep: a bright solid-looking wedge with a sharp leading edge and a long fading trail
+      var trail = Math.PI * 0.55, f = trail / (Math.PI * 2);
+      if (ctx.createConicGradient) {
+        var cg = ctx.createConicGradient(sweep - trail, c, c);
+        cg.addColorStop(0, "rgba(90, 230, 60, 0)");
+        cg.addColorStop(f * 0.55, "rgba(90, 230, 60, 0.18)");
+        cg.addColorStop(f * 0.85, "rgba(100, 240, 60, 0.55)");
+        cg.addColorStop(f, "rgba(110, 245, 70, 0.85)");
+        cg.addColorStop(f + 0.004, "rgba(90, 230, 60, 0)");   // a hair of softness so the leading edge does not shimmer
+        cg.addColorStop(1, "rgba(90, 230, 60, 0)");
+        ctx.fillStyle = cg; ctx.fillRect(c - R, c - R, R * 2, R * 2);
+        // terrain echoes: bright just behind the sweep, fading round the rest of the turn
+        litCtx.setTransform(1, 0, 0, 1, 0, 0);
+        litCtx.globalCompositeOperation = "copy"; litCtx.drawImage(land, 0, 0);
+        litCtx.globalCompositeOperation = "destination-in";
+        litCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var lg = litCtx.createConicGradient(sweep - Math.PI * 1.6, c, c), lf = 0.8;
+        lg.addColorStop(0, "rgba(0, 0, 0, 0.06)"); lg.addColorStop(lf * 0.7, "rgba(0, 0, 0, 0.25)");
+        lg.addColorStop(lf, "rgba(0, 0, 0, 0.95)"); lg.addColorStop(lf + 0.0001, "rgba(0, 0, 0, 0.06)"); lg.addColorStop(1, "rgba(0, 0, 0, 0.06)");
+        litCtx.fillStyle = lg; litCtx.fillRect(0, 0, S, S);
+        litCtx.globalCompositeOperation = "source-over";
+        ctx.drawImage(lit, 0, 0, S, S);
+      } else if (land) {
+        ctx.globalAlpha = 0.2; ctx.drawImage(land, 0, 0, S, S); ctx.globalAlpha = 1;
+      }
+      // sonar ping: a ring that leaves the centre and fades as it reaches the rim
+      if (!still) {
+        var pp = (now % PING) / PING;
+        ctx.strokeStyle = "rgba(170, 255, 140," + (0.55 * (1 - pp)).toFixed(3) + ")"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(c, c, R * pp, 0, Math.PI * 2); ctx.stroke();
+      }
+      // scanlines, vignette and centre glow over everything inside
+      if (crt) ctx.drawImage(crt, 0, 0, S, S);
+      // skill targets: found on the first pass, then lit up again on every pass
+      var fs = Math.max(11, S * 0.017), found = 0;
+      ctx.font = "500 " + fs + "px 'IBM Plex Mono', monospace"; ctx.textBaseline = "middle";
+      blips.forEach(function (b) {
+        var ang = b.a - Math.PI / 2;
+        var age = ((sweep - ang) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+        var hit = still ? 0 : Math.max(0, 1 - age / (Math.PI * 1.3));          // 1 the moment the sweep passes
+        if (!b.found && scanStart !== null && age < 0.12) { b.found = true; b.foundAt = now; }
+        if (!b.found) return;
+        found++;
+        var x = c + Math.cos(ang) * R * b.r, y = c + Math.sin(ang) * R * b.r;
+        var fresh = Math.max(0, 1 - (now - b.foundAt) / 1400);                 // the first lock-on
+        var glow = Math.max(0.35, hit, fresh);
+        // the blip
+        ctx.globalAlpha = glow; ctx.shadowColor = "#7dff4a"; ctx.shadowBlur = 10 + 14 * Math.max(hit, fresh);
+        ctx.fillStyle = "#d8ffc4"; ctx.beginPath(); ctx.arc(x, y, Math.max(2.5, S * 0.006), 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        // lock-on bracket: closes in from wide when first found, then stays as small corner marks
+        var box = S * 0.014 * (1 + 2.2 * fresh), arm = box * 0.45;
+        ctx.strokeStyle = "rgba(125, 255, 74," + (0.35 + 0.65 * Math.max(hit, fresh)) + ")"; ctx.lineWidth = 1.3;
+        [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (k) {
+          var cx = x + k[0] * box, cy = y + k[1] * box;
+          ctx.beginPath(); ctx.moveTo(cx - k[0] * arm, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy - k[1] * arm); ctx.stroke();
+        });
+        // the name, on the side facing the centre so it stays inside the scope
+        var left = x > c;
+        ctx.textAlign = left ? "right" : "left";
+        ctx.fillStyle = "rgba(216, 255, 196," + Math.max(0.55, glow) + ")";
+        var label = fresh > 0 ? b.name.slice(0, Math.ceil(b.name.length * Math.min(1, (1 - fresh) * 2.5 + 0.1))) : b.name;  // types itself out
+        ctx.fillText(label, x + (left ? -1 : 1) * (box + S * 0.012), y);
+        ctx.globalAlpha = 1;
+      });
+      ctx.restore();
+      // readout in the lower-left corner, outside the scope
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.globalAlpha = 1;
+      ctx.font = "600 " + Math.max(11, S * 0.018) + "px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = "#7dff4a";
+      var done = found === blips.length;
+      ctx.fillText(done ? "ALL SKILLS LOCATED" : "SCANNING FOR SKILLS" + ".".repeat(1 + Math.floor(now / 400) % 3), S * 0.02, S * 0.985);
+      // centre hub
+      ctx.fillStyle = "#7dff4a"; ctx.beginPath(); ctx.arc(c, c, Math.max(2, S * 0.006), 0, Math.PI * 2); ctx.fill();
+      if (visible && !still) raf = requestAnimationFrame(frame);
+    }
+
+    function size(force) {
+      // cap the pixel ratio: several full-size layers are drawn every frame, and 2-3x screens stutter
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      S = cv.offsetWidth || 400;   // layout size: ignores the spin-in scale, so the dial is drawn at full resolution
+      var key = S + "@" + dpr;
+      if (key === builtFor && !force) return;       // a resize that didn't change the dial (phone address bar): nothing to redo
+      builtFor = key;
+      cv.width = Math.round(S * dpr); cv.height = Math.round(S * dpr); drawBase(); buildFx(); placeBlips(); frame(performance.now());
+    }
+    size(); addEventListener("resize", function () { cancelAnimationFrame(raf); size(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { size(true); });
+    // only animate while the radar is on screen
+    new IntersectionObserver(function (es) {
+      visible = es[0].isIntersecting; cancelAnimationFrame(raf);
+      if (visible && !still) raf = requestAnimationFrame(frame);
+    }).observe(cv);
+  })();
+</script>
+<script>
+  // Scroll transition from the first screen to the radar, in the style of digital rain:
+  // over the first screen's height of scrolling, columns of falling 0s and 1s sweep down the
+  // screen, the name, buttons and summary are wiped away from the top behind them, the head
+  // fades out, and the radar fades and grows in.
+  (function () {
+    var wrap = document.querySelector(".wrap"), radar = document.getElementById("radar");
+    var parts = Array.prototype.slice.call(document.querySelectorAll(".wrap > .hero, .wrap > .id"));
+    var head = document.getElementById("head"), eyes = document.getElementById("eyes");
+    if (!wrap || !radar) return;
+    var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+    cv.id = "rain"; cv.setAttribute("aria-hidden", "true"); document.body.appendChild(cv);
+    var W = 0, H = 0, dpr = 1, COL = 16, cols = [], p = 0, running = false;
+    function size() {
+      dpr = window.devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = [];
+      for (var x = 0; x < W; x += COL) cols.push({ x: x, y: -Math.random() * H, v: 4 + Math.random() * 7, len: 8 + Math.floor(Math.random() * 14), g: [] });
+    }
+    function glyph() { return Math.random() < 0.5 ? "0" : "1"; }
+    function smooth(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+
+    function rain() {
+      ctx.clearRect(0, 0, W, H);
+      var a = Math.pow(Math.sin(Math.PI * p), 0.6);              // strongest mid-transition
+      if (a < 0.02 || calm) { running = false; return; }
+      ctx.font = "500 15px 'IBM Plex Mono', monospace"; ctx.textAlign = "center";
+      cols.forEach(function (c) {
+        c.y += c.v; if (c.y - c.len * COL > H) { c.y = -Math.random() * H * 0.3; c.v = 4 + Math.random() * 7; }
+        if (Math.random() < 0.3 || !c.g.length) c.g.unshift(glyph());
+        if (c.g.length > c.len) c.g.length = c.len;
+        for (var k = 0; k < c.g.length; k++) {
+          var y = c.y - k * COL; if (y < -COL || y > H + COL) continue;
+          var fade = 1 - k / c.len;
+          ctx.fillStyle = k === 0 ? "rgba(216, 255, 196," + a + ")" : "rgba(93, 214, 44," + (a * fade * 0.9) + ")";
+          ctx.fillText(c.g[k], c.x + COL / 2, y);
+        }
+      });
+      requestAnimationFrame(rain);
+    }
+
+    function update() {
+      // progress over the scroll it takes to bring the radar fully into view
+      var span = Math.max(1, Math.min(innerHeight * 0.9, document.documentElement.scrollHeight - innerHeight));
+      p = Math.max(0, Math.min(1, scrollY / span));
+      // wipe the first screen away from the top, a soft edge following the rain down
+      // (the mask goes on the pieces themselves, not .wrap: they stick out left of the centred
+      // column, and a mask on .wrap would clip everything outside its box)
+      if (p <= 0.001) {
+        parts.forEach(function (el) { el.style.webkitMaskImage = el.style.maskImage = ""; });
+        wrap.style.opacity = "";
+      } else {
+        var cut = p * 1.25 * innerHeight, wrapTop = wrap.getBoundingClientRect().top;
+        parts.forEach(function (el) {
+          var c = cut - (el.getBoundingClientRect().top - wrapTop);      // the cut in this piece's own coordinates
+          var m = "linear-gradient(to bottom, transparent " + (c - 0.25 * innerHeight) + "px, #000 " + c + "px)";
+          el.style.webkitMaskImage = m; el.style.maskImage = m;
+        });
+        wrap.style.opacity = String(1 - smooth((p - 0.55) / 0.45));
+      }
+      var fadeHead = String(1 - smooth(p / 0.8));
+      if (head) head.style.opacity = fadeHead;
+      if (eyes) eyes.style.opacity = fadeHead;
+      // the radar spins into place as you scroll: it turns from -150°, grows from 55%,
+      // comes into focus from a blur, and fades in, all following the scroll position
+      var r = smooth((p - 0.2) / 0.8);
+      radar.style.opacity = String(r);
+      // spins two full turns on the way in (a quarter turn reads as almost nothing on a round dial)
+      radar.style.transform = "rotate(" + (-720 * (1 - r)).toFixed(2) + "deg) scale(" + (0.55 + 0.45 * r).toFixed(3) + ")";
+      radar.style.filter = r < 0.999 ? "blur(" + (8 * (1 - r)).toFixed(2) + "px)" : "";
+      if (!running && !calm && p > 0.01 && p < 0.99) { running = true; requestAnimationFrame(rain); }
+    }
+    size(); update();
+    addEventListener("resize", function () { size(); update(); });
+    addEventListener("scroll", update, { passive: true });
+  })();
+</script>
+<script src="js/gsap.min.js"></script>
+<script src="js/ScrollTrigger.min.js"></script>
+<script src="js/SplitText.min.js"></script>
+<script>
+  (function () {
+    if (!window.gsap) return; // page still works if GSAP fails to load
+    gsap.registerPlugin(ScrollTrigger, SplitText);
+    var mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", function () {
+      // 1. Intro: name letters rise in, then the rest of the identity column
+      var split = SplitText.create(".name", { type: "chars", mask: "chars" });
+      var tl = gsap.timeline({ defaults: { ease: "power3.out" }, paused: !window.__loaderDone });
+      if (!window.__loaderDone) addEventListener("loader:done", function () { tl.play(); }, { once: true });
+      tl.from(split.chars, { yPercent: 110, duration: 0.7, stagger: 0.025 })
+        .from(".greet", { y: 10, opacity: 0, duration: 0.4 }, 0)
+        .from(".role", { y: 12, opacity: 0, duration: 0.5 }, "-=0.4")
+        .from(".id > *", { y: 16, opacity: 0, duration: 0.5, stagger: 0.07 }, "-=0.4");   // includes the summary card
+
+      // 1b. Digital glitch on the name: once the intro is done, letters now and then
+      //     flicker into green 0s and 1s (like the background) and the line jolts sideways
+      var gsplit = null, glitchTimer = null, name = document.querySelector(".name");
+      tl.call(function () {
+        split.revert();                                   // drop the intro masks so glitches aren't clipped
+        gsplit = SplitText.create(".name", { type: "chars" });
+        glitchLoop();
+      });
+      function glitchLoop() {
+        glitchTimer = setTimeout(function () { if (!document.hidden) burst(); glitchLoop(); }, 1400 + Math.random() * 2600);
+      }
+      function burst() {
+        var chars = gsplit.chars, picks = [], count = 1 + Math.floor(Math.random() * 4);
+        while (picks.length < count) { var c = chars[Math.floor(Math.random() * chars.length)]; if (c.textContent.trim() && picks.indexOf(c) < 0) picks.push(c); }
+        picks.forEach(function (c) {
+          var orig = c.textContent, w = c.getBoundingClientRect().width, steps = 2 + Math.floor(Math.random() * 3), i = 0;
+          c.style.width = w + "px"; c.classList.add("glitching");
+          (function step() {
+            if (i++ < steps) { c.textContent = Math.random() < 0.5 ? "0" : "1"; setTimeout(step, 45 + Math.random() * 60); }
+            else { c.textContent = orig; c.style.width = ""; c.classList.remove("glitching"); }
+          })();
+        });
+        if (Math.random() < 0.55) {                       // whole-line jolt with a green colour split
+          name.classList.add("jolt");
+          gsap.fromTo(name, { x: gsap.utils.random(-6, 6), skewX: gsap.utils.random(-8, 8) },
+            { x: 0, skewX: 0, duration: 0.18, ease: "steps(3)", onComplete: function () { name.classList.remove("jolt"); } });
+        }
+      }
+
+      // 2. Sections: heading rule draws in, items lift as they scroll into view
+      gsap.utils.toArray(".record section").forEach(function (sec) {
+        var head = sec.querySelector(".sec-head");
+        var items = sec.querySelectorAll(".job, .proj, .skill, .list li");
+        var t = gsap.timeline({ scrollTrigger: { trigger: sec, start: "top 85%", once: true } });
+        t.from(head, { clipPath: "inset(0 100% 0 0)", duration: 0.6, ease: "power2.out" })
+         .from(items, { y: 24, opacity: 0.2, duration: 0.5, stagger: 0.08, ease: "power2.out" }, "-=0.3");
+      });
+
+      // 3. Prize counter: count up to 2 when it appears
+      var prize = document.querySelector(".prize");
+      if (prize) {
+        var n = { v: 0 };
+        gsap.to(n, { v: 2, duration: 1.2, ease: "power1.out",
+          scrollTrigger: { trigger: prize, start: "top 90%", once: true },
+          onUpdate: function () { prize.textContent = "₹" + n.v.toFixed(1).replace(/\.0$/, "") + " lakh"; } });
+      }
+      return function () { clearTimeout(glitchTimer); if (gsplit) gsplit.revert(); split.revert(); };
+    });
+  })();
+</script>
