@@ -182,12 +182,11 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .lightbox img { max-width: min(1280px, 100%); max-height: 88vh; border: 1px solid rgba(93, 214, 44, 0.5); border-radius: 10px; box-shadow: 0 0 40px rgba(93, 214, 44, 0.2); }
 
 /* Radar: the second screen, a glowing dial with a rotating sweep */
-.radar-sec { position: relative; z-index: 1; height: 100vh; height: 100svh; display: grid; place-items: center; overflow: hidden; }
-/* when you stop scrolling near the radar, the page settles with the radar's screen exactly in view */
-html { scroll-snap-type: y proximity; }
-.radar-sec { scroll-snap-align: start; }
 /* as big as the screen allows: the dial fills the height (or the width on a tall phone) */
-#radar { width: min(94vw, 84vh); width: min(94vw, 84svh); aspect-ratio: 1; display: block; }   /* a little smaller than the screen so the whole dial always fits */
+/* a small dial in the left column, under the buttons */
+.radar-box { display: grid; gap: 6px; width: min(260px, 82vw); }
+#radar { width: 100%; aspect-ratio: 1; display: block; }
+.radar-status { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: #7dff4a; text-align: center; }
 .summary { font-family: var(--mono); font-size: 0.86rem; line-height: 1.7; margin: 0; color: #f8f8f8;
   /* same glass as the buttons, sitting under them in the left column */
   padding: 16px 18px; border-radius: 12px;
@@ -324,13 +323,15 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
         <span>GitHub</span>
       </a>
     </div>
+    <div class="radar-box">
+      <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
+      <div class="radar-status" id="radar-status" aria-hidden="true">SCANNING FOR SKILLS</div>
+    </div>
   </aside>
 
 </div>
 
-<section class="radar-sec" aria-label="Radar">
-  <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
-</section>
+
 
 <div class="work" id="work">
   <section aria-labelledby="exp-title">
@@ -799,7 +800,9 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
   (function () {
     var cv = document.getElementById("radar"); if (!cv) return;
     var ctx = cv.getContext("2d"), still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var S = 0, dpr = 1, base = null, visible = false, raf = 0, PERIOD = 6500, builtFor = "", scanStart = null;   // one sweep every 6.5 s
+    var S = 0, dpr = 1, base = null, visible = false, raf = 0, PERIOD = 6500, builtFor = "", scanStart = null, statusEl = document.getElementById("radar-status"), introAt = null;
+    // the dial sits on the first screen now, so the scan starts once the loader and intro are done
+    if (window.__loaderDone) introAt = performance.now(); else addEventListener("loader:done", function () { introAt = performance.now(); }, { once: true });   // one sweep every 6.5 s
     // Seeded random numbers, so a rebuild (resize, fonts arriving, a phone's address bar)
     // lays the skills, terrain and speckle out exactly as before instead of jumping.
     function seeded(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
@@ -816,7 +819,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
     // try spots spread round the dial and keep the first whose label box is clear.
     function placeBlips() {
       var rnd = seeded(2026);
-      var c = S / 2, R = S * 0.45, fs = Math.max(11, S * 0.017), boxes = [];
+      var c = S / 2, R = S * 0.45, fs = Math.max(9, S * 0.034), boxes = [];
       var m = document.createElement("canvas").getContext("2d");
       m.font = "500 " + fs + "px 'IBM Plex Mono', monospace";
       blips.forEach(function (b, i) {
@@ -830,7 +833,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
           var inside = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]]
             .every(function (q) { return Math.hypot(q[0] - c, q[1] - c) < R * 0.94; });
           var clear = boxes.every(function (o) { return rect[2] < o[0] || rect[0] > o[2] || rect[3] < o[1] || rect[1] > o[3]; });
-          if (inside && clear) best = { a: a, r: r, rect: rect };
+          if (inside && (clear || t > 250)) best = { a: a, r: r, rect: rect };   // a small dial can't fit every label apart
         }
         if (!best) best = { a: (i / blips.length) * Math.PI * 2, r: 0.6, rect: [0, 0, 0, 0] };
         b.a = best.a; b.r = best.r; boxes.push(best.rect);
@@ -917,12 +920,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       ctx.drawImage(base, 0, 0, S, S);
       // The scan only starts once the radar has scrolled fully into view (the scroll transition
       // fades it in): from then the sweep starts at 000 and the skills are found in order.
-      if (scanStart === null && !still) {
-        // both: the fade-in has finished, and the radar's screen is really in view (scrolled down to)
-        var sec = cv.parentElement.getBoundingClientRect();
-        var shown = cv.style.opacity !== "" && parseFloat(cv.style.opacity) > 0.95;
-        if (shown && scrollY > 0 && sec.top < innerHeight * 0.25) scanStart = now;
-      }
+      if (scanStart === null && !still && introAt !== null && now - introAt > 1500) scanStart = now;
       var sweep = still ? rad(300) : rad((((scanStart === null ? 0 : now - scanStart) % PERIOD) / PERIOD) * 360);
       ctx.save(); ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.clip();
       // the sweep: a bright solid-looking wedge with a sharp leading edge and a long fading trail
@@ -959,7 +957,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       // scanlines, vignette and centre glow over everything inside
       if (crt) ctx.drawImage(crt, 0, 0, S, S);
       // skill targets: found on the first pass, then lit up again on every pass
-      var fs = Math.max(11, S * 0.017), found = 0;
+      var fs = Math.max(9, S * 0.034), found = 0;
       ctx.font = "500 " + fs + "px 'IBM Plex Mono', monospace"; ctx.textBaseline = "middle";
       blips.forEach(function (b) {
         var ang = b.a - Math.PI / 2;
@@ -985,18 +983,18 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
         // the name, on the side facing the centre so it stays inside the scope
         var left = x > c;
         ctx.textAlign = left ? "right" : "left";
-        ctx.fillStyle = "rgba(216, 255, 196," + Math.max(0.55, glow) + ")";
+        // on the small dial a name only shows while the sweep lights it, so they don't crowd each other
+        var nameAlpha = Math.max(hit, fresh);
+        ctx.fillStyle = "rgba(216, 255, 196," + nameAlpha.toFixed(3) + ")";
         var label = fresh > 0 ? b.name.slice(0, Math.ceil(b.name.length * Math.min(1, (1 - fresh) * 2.5 + 0.1))) : b.name;  // types itself out
-        ctx.fillText(label, x + (left ? -1 : 1) * (box + S * 0.012), y);
+        if (nameAlpha > 0.03) ctx.fillText(label, x + (left ? -1 : 1) * (box + S * 0.012), y);
         ctx.globalAlpha = 1;
       });
       ctx.restore();
-      // readout in the lower-left corner, outside the scope
-      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.globalAlpha = 1;
-      ctx.font = "600 " + Math.max(11, S * 0.018) + "px 'IBM Plex Mono', monospace";
-      ctx.fillStyle = "#7dff4a";
-      var done = found === blips.length;
-      ctx.fillText(done ? "ALL SKILLS LOCATED" : "SCANNING FOR SKILLS" + ".".repeat(1 + Math.floor(now / 400) % 3), S * 0.02, S * 0.985);
+      // readout under the dial
+      ctx.globalAlpha = 1;
+      var done = found === blips.length, msg = done ? "ALL SKILLS LOCATED" : "SCANNING FOR SKILLS" + ".".repeat(1 + Math.floor(now / 400) % 3);
+      if (statusEl && statusEl.textContent !== msg) statusEl.textContent = msg;
       // centre hub
       ctx.fillStyle = "#7dff4a"; ctx.beginPath(); ctx.arc(c, c, Math.max(2, S * 0.006), 0, Math.PI * 2); ctx.fill();
       if (visible && !still) raf = requestAnimationFrame(frame);
@@ -1021,15 +1019,15 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
   })();
 </script>
 <script>
-  // Scroll transition from the first screen to the radar, in the style of digital rain:
+  // Scroll transition from the first screen to Experience, in the style of digital rain:
   // over the first screen's height of scrolling, columns of falling 0s and 1s sweep down the
   // screen, the name, buttons and summary are wiped away from the top behind them, the head
-  // fades out, and the radar fades and grows in.
+  // fades out, and the Experience and Projects sections take over.
   (function () {
-    var wrap = document.querySelector(".wrap"), radar = document.getElementById("radar");
+    var wrap = document.querySelector(".wrap");
     var parts = Array.prototype.slice.call(document.querySelectorAll(".wrap > .hero, .wrap > .id"));
     var head = document.getElementById("head"), eyes = document.getElementById("eyes");
-    if (!wrap || !radar) return;
+    if (!wrap) return;
     var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
     var cv = document.createElement("canvas"), ctx = cv.getContext("2d");
     cv.id = "rain"; cv.setAttribute("aria-hidden", "true"); document.body.appendChild(cv);
@@ -1063,10 +1061,9 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
     }
 
     function update() {
-      // progress over the scroll it takes to bring the radar fully into view
-      // the transition runs over exactly the scroll that brings the radar's screen to the top
-      var radarSec = radar.parentElement;
-      var span = Math.max(1, Math.min(radarSec.offsetTop, document.documentElement.scrollHeight - innerHeight));
+      // progress over the scroll down to the Experience section
+      var work = document.getElementById("work");
+      var span = Math.max(1, Math.min(work ? work.offsetTop * 0.85 : innerHeight, document.documentElement.scrollHeight - innerHeight));
       p = Math.max(0, Math.min(1, scrollY / span));
       // wipe the first screen away from the top, a soft edge following the rain down
       // (the mask goes on the pieces themselves, not .wrap: they stick out left of the centred
@@ -1086,13 +1083,6 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       var fadeHead = String(1 - smooth(p / 0.8));
       if (head) head.style.opacity = fadeHead;
       if (eyes) eyes.style.opacity = fadeHead;
-      // the radar spins into place as you scroll: it turns from -150°, grows from 55%,
-      // comes into focus from a blur, and fades in, all following the scroll position
-      var r = smooth((p - 0.2) / 0.8);
-      radar.style.opacity = String(r);
-      // spins two full turns on the way in (a quarter turn reads as almost nothing on a round dial)
-      radar.style.transform = "rotate(" + (-720 * (1 - r)).toFixed(2) + "deg) scale(" + (0.55 + 0.45 * r).toFixed(3) + ")";
-      radar.style.filter = r < 0.999 ? "blur(" + (8 * (1 - r)).toFixed(2) + "px)" : "";
       if (!running && !calm && p > 0.01 && p < 0.99) { running = true; requestAnimationFrame(rain); }
     }
     size(); update();
