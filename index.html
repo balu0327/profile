@@ -183,8 +183,11 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 
 /* Radar: the second screen, a glowing dial with a rotating sweep */
 .radar-sec { position: relative; z-index: 1; height: 100vh; height: 100svh; display: grid; place-items: center; overflow: hidden; }
+/* when you stop scrolling near the radar, the page settles with the radar's screen exactly in view */
+html { scroll-snap-type: y proximity; }
+.radar-sec { scroll-snap-align: start; }
 /* as big as the screen allows: the dial fills the height (or the width on a tall phone) */
-#radar { width: min(96vw, 90vh); width: min(96vw, 90svh); aspect-ratio: 1; display: block; }   /* a little smaller than the screen so the whole dial always fits */
+#radar { width: min(94vw, 84vh); width: min(94vw, 84svh); aspect-ratio: 1; display: block; }   /* a little smaller than the screen so the whole dial always fits */
 .summary { font-family: var(--mono); font-size: 0.86rem; line-height: 1.7; margin: 0; color: #f8f8f8;
   /* same glass as the buttons, sitting under them in the left column */
   padding: 16px 18px; border-radius: 12px;
