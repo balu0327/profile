@@ -83,7 +83,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .mailbtn:hover .flag, .mailbtn:focus-visible .flag { transform: translateY(-2px); }
 .mailbtn:hover .env, .mailbtn:focus-visible .env { transform: translateX(3px); }
 .mailbtn:active { transform: translateY(1px); }
-.pxbtns { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: fit-content; min-width: 200px; }
+.pxbtns { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(230px, 82vw); }
 .inbtn svg { width: 26px; }
 .igbtn svg { width: 26px; }
 .ghbtn svg { width: 26px; }
@@ -184,7 +184,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 /* Radar: the second screen, a glowing dial with a rotating sweep */
 /* as big as the screen allows: the dial fills the height (or the width on a tall phone) */
 /* a small dial in the left column, under the buttons */
-.radar-box { display: grid; gap: 6px; width: min(260px, 82vw); }
+.radar-box { display: grid; gap: 8px; width: min(230px, 82vw); }
 #radar { width: 100%; aspect-ratio: 1; display: block; }
 .radar-status { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: #7dff4a; text-align: center; }
 .summary { font-family: var(--mono); font-size: 0.86rem; line-height: 1.7; margin: 0; color: #f8f8f8;
@@ -649,6 +649,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       if (document.hidden) return;
       for (var n = 0; n < 16; n++) {
         var i = Math.floor(Math.random() * cells.length), c = cells[i];
+        if (!c) continue;                     // mid-rebuild after a resize
         c.v = rand();
         if (!hot.has(i)) draw(i);
       }
@@ -819,7 +820,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
     // try spots spread round the dial and keep the first whose label box is clear.
     function placeBlips() {
       var rnd = seeded(2026);
-      var c = S / 2, R = S * 0.45, fs = Math.max(9, S * 0.034), boxes = [];
+      var c = S / 2, R = S * 0.475, fs = Math.max(9, S * 0.034), boxes = [];
       var m = document.createElement("canvas").getContext("2d");
       m.font = "500 " + fs + "px 'IBM Plex Mono', monospace";
       blips.forEach(function (b, i) {
@@ -846,7 +847,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
     //  crt   - fine scanlines plus a vignette and a soft centre glow, laid over everything inside
     function buildFx() {
       var rnd = seeded(77);
-      var c = S / 2, R = S * 0.45;
+      var c = S / 2, R = S * 0.475;
       land = document.createElement("canvas"); land.width = S * dpr; land.height = S * dpr;
       var g = land.getContext("2d"); g.scale(dpr, dpr);
       var blobs = [];
@@ -880,12 +881,10 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       var rnd = seeded(5);
       base = document.createElement("canvas"); base.width = S * dpr; base.height = S * dpr;
       var g = base.getContext("2d"); g.scale(dpr, dpr);
-      var c = S / 2, R = S * 0.45, LINE = "rgba(93, 214, 44, 0.85)";
+      var c = S / 2, R = S * 0.475, LINE = "rgba(93, 214, 44, 0.85)";
       // square grid over the whole dial area, softer outside the scope
-      g.strokeStyle = "rgba(93, 214, 44, 0.22)"; g.lineWidth = 1;
-      var step = S / 11;
-      for (var x = (c % step); x <= S; x += step) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, S); g.stroke(); }
-      for (var y = (c % step); y <= S; y += step) { g.beginPath(); g.moveTo(0, y); g.lineTo(S, y); g.stroke(); }
+      g.lineWidth = 1;
+      var step = S / 11, x, y;
       // the scope face: dark, still see-through
       g.fillStyle = "rgba(0, 12, 2, 0.45)"; g.beginPath(); g.arc(c, c, R, 0, Math.PI * 2); g.fill();
       g.save(); g.beginPath(); g.arc(c, c, R, 0, Math.PI * 2); g.clip();
@@ -914,7 +913,7 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
     }
 
     function frame(now) {
-      var c = S / 2, R = S * 0.45;
+      var c = S / 2, R = S * 0.475;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, S, S);
       ctx.drawImage(base, 0, 0, S, S);
