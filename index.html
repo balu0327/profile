@@ -85,13 +85,9 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .mailbtn:active { transform: translateY(1px); }
 .pxbtns { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(230px, 82vw); }
 .inbtn svg { width: 26px; }
-.igbtn svg { width: 26px; }
 .ghbtn svg { width: 26px; }
 .ghbtn .eyes { opacity: 0; transition: opacity .15s steps(1); }
 .ghbtn:hover .eyes, .ghbtn:focus-visible .eyes { opacity: 1; }
-.igbtn .lens rect, .igbtn .dot rect { transition: fill .15s steps(1); }
-.igbtn:hover .lens rect, .igbtn:focus-visible .lens rect { fill: #feda75; }
-.igbtn:hover .dot rect, .igbtn:focus-visible .dot rect { fill: #fd0002; }
 .inbtn .guy, .inbtn .tie { transition: transform .2s steps(2); transform-origin: 4px 6px; }
 .inbtn:hover .guy, .inbtn:focus-visible .guy { transform: translateY(-1px); }
 .inbtn:hover .tie, .inbtn:focus-visible .tie { transform: rotate(14deg); }
@@ -311,11 +307,6 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       <a class="mailbtn inbtn" href="https://www.linkedin.com/in/m-balasubramanya" target="_blank" rel="noopener" aria-label="My LinkedIn profile (opens in a new tab)">
         <svg id="inbadge" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
         <span>LinkedIn</span>
-      </a>
-      <!-- TODO: replace the link below with your profile, e.g. https://www.instagram.com/your.username/ -->
-      <a class="mailbtn igbtn" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="My Instagram (opens in a new tab)">
-        <svg id="igbadge" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
-        <span>Instagram</span>
       </a>
       <!-- TODO: replace the link below with your profile, e.g. https://github.com/your-username -->
       <a class="mailbtn ghbtn" href="https://github.com/" target="_blank" rel="noopener" aria-label="My GitHub (opens in a new tab)">
@@ -725,40 +716,6 @@ footer { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); bord
       }
     });
     guy.appendChild(tie); inSvg.appendChild(bg); inSvg.appendChild(n); inSvg.appendChild(guy);
-
-    // Instagram badge: a pixel camera on the yellow-to-purple gradient, drawn as diagonal pixel bands
-    var igSvg = document.getElementById("igbadge"); if (!igSvg) return;
-    var IG = [
-      "..KKKKKKKKKKKK..",
-      ".KGGGGGGGGGGGGK.",
-      "KGGGGGGGGGGGGGGK",
-      "KGGWWWWWWWWWWGGK",
-      "KGGWGGGGGGGDGWGK",
-      "KGGWGGGLLGGGGWGK",
-      "KGGWGGLGGLGGGWGK",
-      "KGGWGLGGGGLGGWGK",
-      "KGGWGLGGGGLGGWGK",
-      "KGGWGGLGGLGGGWGK",
-      "KGGWGGGLLGGGGWGK",
-      "KGGWGGGGGGGGGWGK",
-      "KGGWWWWWWWWWWWGK",
-      "KGGGGGGGGGGGGGGK",
-      ".KGGGGGGGGGGGGK.",
-      "..KKKKKKKKKKKK.."
-    ];
-    var BANDS = ["#feda75", "#fa7e1e", "#d62976", "#962fbf", "#4f5bd5"];
-    var igBg = document.createElementNS(NS, "g"), lens = document.createElementNS(NS, "g"), dot = document.createElementNS(NS, "g");
-    lens.setAttribute("class", "lens"); dot.setAttribute("class", "dot");
-    IG.forEach(function (row, y) {
-      for (var x = 0; x < row.length; x++) {
-        var ch = row[x]; if (ch === ".") continue;
-        var fill = ch === "K" ? "#05080d" : ch === "G" ? BANDS[Math.min(4, Math.floor((x + 15 - y) / 6.2))] : "#f8f8f8";
-        var r = document.createElementNS(NS, "rect");
-        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1); r.setAttribute("fill", fill);
-        (ch === "L" ? lens : ch === "D" ? dot : igBg).appendChild(r);
-      }
-    });
-    igSvg.appendChild(igBg); igSvg.appendChild(lens); igSvg.appendChild(dot);
 
     // GitHub badge: a pixel cat silhouette cut out of a white disc; its eyes light up green on hover
     var ghSvg = document.getElementById("ghbadge"); if (!ghSvg) return;
