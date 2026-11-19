@@ -466,8 +466,8 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
         X[i] = pos[i * 3] / 32767; Y[i] = pos[i * 3 + 1] / 32767; Z[i] = pos[i * 3 + 2] / 32767;
         NX[i] = nor[i * 3] / 127; NY[i] = nor[i * 3 + 1] / 127; NZ[i] = nor[i * 3 + 2] / 127;
       }
-      // eyes: the surface point nearest each eye position, seen from the front
-      var eyes = [[-0.235, 0.43], [0.235, 0.43]].map(function (e) {
+      // eyes: centred on each eyelid patch of the scan (measured from its geometry), on the surface
+      var eyes = [[-0.156, 0.394], [0.114, 0.391]].map(function (e) {
         var best = -1, bd = Infinity;
         for (var k = 0; k < N; k++) if (Z[k] > 0.2) { var d = Math.hypot(X[k] - e[0], Y[k] - e[1]); if (d < bd) { bd = d; best = k; } }
         return { x: X[best], y: Y[best], z: Z[best] + 0.02 };
@@ -478,7 +478,9 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     });
     var BUCKETS = 8, bucketCol = [];
     for (var bk = 0; bk < BUCKETS; bk++) bucketCol.push(css(mixRGB(LOW, HIGH, Math.pow((bk + 0.5) / BUCKETS, 1.15))));
-    var spinning = !matchMedia("(prefers-reduced-motion: reduce)").matches, SPIN = 20000, spinT0 = performance.now(), lastNow = 0;
+    var spinning = !matchMedia("(prefers-reduced-motion: reduce)").matches && !/[?&]still(&|$)/.test(location.search), SPIN = 20000, spinT0 = performance.now(), lastNow = 0;
+    // start each visit facing the viewer: the turn begins when the loading screen finishes
+    if (!window.__loaderDone) addEventListener("loader:done", function () { spinT0 = performance.now(); }, { once: true });
     var LX = -0.35, LY = 0.45, LZ = 0.82;                    // light from the upper left front, fixed to the viewer
     function drawHead(now) {
       now = now || lastNow || performance.now(); lastNow = now;
@@ -516,6 +518,9 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
       m.eyes.forEach(function (ey) {
         var x1 = ey.x * cy + ey.z * sy, z1 = -ey.x * sy + ey.z * cy, y2 = ey.y * cp - z1 * sp, z2 = ey.y * sp + z1 * cp, k = Fd / (Fd - z2);
         var facing = z1 / 0.5; if (facing < 0.3) return;
+        // the far eye goes behind the nose bridge once the head is turned enough
+        var noseX = -0.021 * cy + 0.606 * sy;
+        if ((x1 - noseX) * sy > 0 && Math.abs(sy) > 0.4) return;
         var X = ox + x1 * sc * k + look.x * box.S * 0.004, Y = oy - y2 * sc * k + look.y * box.S * 0.003, r = box.S * 0.0095 * k;
         var alpha = Math.min(1, (facing - 0.3) * 2.2);
         if (blinking) { hctx.fillStyle = "rgba(157, 255, 122," + alpha + ")"; hctx.fillRect(X - r * 1.4, Y, r * 2.8, 1.5); return; }
