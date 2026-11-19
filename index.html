@@ -440,7 +440,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     function css(c) { return "rgb(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + ")"; }
     function rand() { return Math.random() < 0.3 ? -1 : (Math.random() < 0.5 ? 0 : 1); }
 
-    // ---- Head: a real 3D head scan (data/head.bin, from "Infinite, 3D Head Scan" by Lee Perry-Smith,
+    // ---- Head: a real 3D head scan (data/head.json, from "Infinite, 3D Head Scan" by Lee Perry-Smith,
     //      CC BY 3.0) drawn as a green wireframe hologram, lit from the front, turning 360 degrees ----
     var face = { x: 0, y: 0, s: 1 }, burst = false;
     var hv = document.createElement("canvas"), hctx = hv.getContext("2d");
@@ -453,7 +453,10 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     }
     function buildHead() {}
     // load the scan: int16 positions, int8 normals, uint16 edge pairs
-    fetch("data/head.bin").then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+    fetch("data/head.json").then(function (r) { return r.json(); }).then(function (j) {
+      var raw = atob(j.b64), bytes = new Uint8Array(raw.length);
+      for (var bi = 0; bi < raw.length; bi++) bytes[bi] = raw.charCodeAt(bi);
+      var buf = bytes.buffer;
       var dv = new DataView(buf), N = dv.getUint32(4, true), E = dv.getUint32(8, true), off = 12;
       var pos = new Int16Array(buf.slice(off, off + N * 6)); off += N * 6;
       var nor = new Int8Array(buf.slice(off, off + N * 3)); off += N * 3; if (off % 2) off++;
@@ -490,7 +493,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
         m.PX[i] = ox + x1 * sc * k; m.PY[i] = oy - y2 * sc * k;
         var nx = m.NX[i], ny = m.NY[i], nz = m.NZ[i];
         var nx1 = nx * cy + nz * sy, nz1 = -nx * sy + nz * cy, ny2 = ny * cp - nz1 * sp, nz2 = ny * sp + nz1 * cp;
-        m.F[i] = nz2;                                                    // how much this point faces the viewer
+        m.F[i] = z2 < -0.06 ? -1 : nz2;                                  // facing the viewer, and on the near half (a solid head hides the far half)
         var lit = Math.max(0, nx1 * LX + ny2 * LY + nz2 * LZ);
         m.B[i] = nz2 < -0.05 ? 0.06 + 0.1 * lit : 0.1 + 0.85 * Math.pow(lit, 1.4);
       }
