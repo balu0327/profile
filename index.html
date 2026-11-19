@@ -212,7 +212,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 /* Radar: the second screen, a glowing dial with a rotating sweep */
 /* as big as the screen allows: the dial fills the height (or the width on a tall phone) */
 /* a small dial in the left column, under the buttons */
-.radar-box { display: grid; gap: 8px; width: min(230px, 82vw); }
+.radar-box { display: grid; gap: 8px; width: min(230px, 82vw); margin-top: clamp(20px, 6vh, 64px); }   /* breathing room below the buttons */
 #radar { width: 100%; aspect-ratio: 1; display: block; }
 .radar-status { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: #7dff4a; text-align: center; }
 .summary { font-family: var(--mono); font-size: 0.86rem; line-height: 1.7; margin: 0; color: #f8f8f8;
