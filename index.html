@@ -80,7 +80,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .mailbtn:hover .flag, .mailbtn:focus-visible .flag { transform: translateY(-2px); }
 .mailbtn:hover .env, .mailbtn:focus-visible .env { transform: translateX(3px); }
 .mailbtn:active { transform: translateY(1px); }
-.pxbtns { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(230px, 82vw); }
+.pxbtns { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(265px, 82vw); }
 .inbtn svg { width: 26px; }
 .ghbtn svg { width: 26px; }
 .ghbtn .eyes { opacity: 0; transition: opacity .15s steps(1); }
@@ -212,7 +212,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 /* Radar: the second screen, a glowing dial with a rotating sweep */
 /* as big as the screen allows: the dial fills the height (or the width on a tall phone) */
 /* a small dial in the left column, under the buttons */
-.radar-box { display: grid; gap: 8px; width: min(230px, 82vw); margin-top: clamp(20px, 6vh, 64px); }   /* breathing room below the buttons */
+.radar-box { display: grid; gap: 8px; width: min(265px, 82vw); margin-top: clamp(12px, 3vh, 40px); }   /* breathing room below the buttons */
 #radar { width: 100%; aspect-ratio: 1; display: block; }
 .radar-status { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; color: #7dff4a; text-align: center; }
 .summary { font-family: var(--mono); font-size: 0.86rem; line-height: 1.7; margin: 0; color: #f8f8f8;
@@ -525,10 +525,23 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
       drawEyes();
       if (!leanRun) { leanRun = true; requestAnimationFrame(stepLean); }
     }
+    // The head turns a full 360 degrees around its vertical axis, slowly, like a hologram on a
+    // turntable; the lean toward the cursor rides on top. Reduced motion keeps it facing forward.
+    var spinning = !matchMedia("(prefers-reduced-motion: reduce)").matches, SPIN = 20000, spinDeg = 0, spinT0 = performance.now();
+    function applyHead() {
+      var tr = "perspective(1600px) translate(" + lean.x.toFixed(2) + "px," + lean.y.toFixed(2) + "px) rotateY(" + spinDeg.toFixed(2) + "deg)";
+      var origin = face.x.toFixed(0) + "px " + face.y.toFixed(0) + "px";
+      hv.style.transformOrigin = origin; ev.style.transformOrigin = origin;
+      hv.style.transform = tr; ev.style.transform = tr;
+    }
+    function spinLoop(now) {
+      if (!document.hidden && hv.style.opacity !== "0") { spinDeg = ((now - spinT0) / SPIN * 360) % 360; applyHead(); }
+      requestAnimationFrame(spinLoop);
+    }
+    if (spinning) requestAnimationFrame(spinLoop);
     function stepLean() {
       lean.x += (lean.tx - lean.x) * 0.15; lean.y += (lean.ty - lean.y) * 0.15;
-      var tr = "translate(" + lean.x.toFixed(2) + "px," + lean.y.toFixed(2) + "px)";
-      hv.style.transform = tr; ev.style.transform = tr;
+      applyHead();
       if (Math.abs(lean.tx - lean.x) + Math.abs(lean.ty - lean.y) > 0.05) requestAnimationFrame(stepLean); else leanRun = false;
     }
     addEventListener("pointermove", function (e) { lookAt(e.clientX, e.clientY); }, { passive: true });
@@ -541,7 +554,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     // Paints a cell at its (possibly pushed) position without clearing anything
     function paint(i) {
       var c = cells[i], x = (i % cols) * CW + OX + c.ox, y = Math.floor(i / cols) * CH + OY + c.oy;
-      if ((c.hide && !burst) || c.v < 0) return;
+      if ((c.hide && !burst && !spinning) || c.v < 0) return;
       var push = Math.hypot(c.ox, c.oy) / PUSH, col = BASE_RGB[c.a];
       if (push > 0.05) col = mixRGB(col, HOT_RGB, Math.min(0.85, push * 1.4));
       ctx.fillStyle = css(col);
