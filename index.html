@@ -435,113 +435,156 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     function css(c) { return "rgb(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + ")"; }
     function rand() { return Math.random() < 0.3 ? -1 : (Math.random() < 0.5 ? 0 : 1); }
 
-    // ---- Head: a wireframe face sampled from an image and drawn as tiny digits on its own layer ----
+    // ---- Head: a real 3D wireframe head (a latitude/longitude mesh with jaw, ears and neck),
+    //      lit on the face from img/face.png, turning a full 360 degrees and leaning toward the cursor ----
     var face = { x: 0, y: 0, s: 1 }, burst = false;
     var hv = document.createElement("canvas"), hctx = hv.getContext("2d");
     hv.id = "head"; hv.setAttribute("aria-hidden", "true"); cv.after(hv);
-    var HSX = 4, HSY = 6;                                   // fine digit step: 3x5 glyph + 1px gap
-    var LOW = hex("#123a1e"), HIGH = hex("#86e870");   // kept mid-bright so text on top stays readable
+    var LOW = hex("#0f2a17"), HIGH = hex("#a4f58a");
     var head = [], hiddenIdx = [], headImg = new Image(), box = { x0: 0, y0: 0, S: 0 };
-    headImg.onload = function () { buildHead(); hiddenIdx.forEach(draw); drawHead(); drawEyes(); };
+    var LG = 96, lumGrid = null, mesh = null;
+    headImg.onload = function () { buildHead(); drawHead(); };
     headImg.src = "img/face.png";
-    // The head fills the screen: as tall as the viewport, centred, sitting behind the content.
+    // The head fills the screen height, centred, behind the content.
     function placeFace(w, h) {
       box.S = Math.round(h * 1.02); box.x0 = Math.round((w - box.S) / 2); box.y0 = Math.round((h - box.S) / 2);
       face.s = box.S / 2.45; face.x = w / 2; face.y = h / 2;
     }
+    // brightness of the face image (0..1) at u, v; used as light and relief on the front of the head
+    function imgLum(u, v) {
+      if (!lumGrid || u < 0 || u > 1 || v < 0 || v > 1) return 0;
+      return lumGrid[Math.min(LG - 1, (v * LG) | 0) * LG + Math.min(LG - 1, (u * LG) | 0)];
+    }
+    // a point on the head surface: lat -1 (crown) .. 1 (chin), lon 0 = straight ahead
+    function headPoint(lat, lon) {
+      var y = lat, ring = Math.sqrt(Math.max(0, 1 - y * y)), a = 0.74, c = 0.86;
+      if (y > 0.2) { var k = 1 - (y - 0.2) * 0.5; a *= k; c *= k; }          // the jaw narrows toward the chin
+      if (y < -0.2) { c *= 1 + (-0.2 - y) * 0.12; }                            // a fuller back of the skull
+      var x = a * ring * Math.sin(lon), z = c * ring * Math.cos(lon);
+      var l = 0;
+      if (z > 0) {
+        // sculpted features on the front: nose bridge and tip, eye sockets, brow, cheekbones, lips, chin
+        var w = Math.min(1, (z / c) * 2), ax = Math.abs(x), G = function (dx, sx, dy, sy) { return Math.exp(-(dx * dx / sx + dy * dy / sy)); };
+        var bump = 0.09 * G(x, 0.005, y + 0.02, 0.05)          // nose bridge
+                 + 0.17 * G(x, 0.011, y - 0.24, 0.011)         // nose tip
+                 - 0.075 * G(ax - 0.31, 0.012, y - 0.05, 0.007)  // eye sockets
+                 + 0.05 * G(ax - 0.26, 0.05, y + 0.1, 0.004)     // brow ridge
+                 + 0.035 * G(ax - 0.42, 0.02, y - 0.22, 0.02)    // cheekbones
+                 + 0.05 * G(x, 0.03, y - 0.5, 0.0035)            // lips
+                 - 0.025 * G(x, 0.04, y - 0.56, 0.0015)          // the line between the lips
+                 + 0.06 * G(x, 0.02, y - 0.78, 0.01);            // chin
+        z += bump * w;
+        // light: the image's shading plus highlights where the features stand out
+        l = Math.min(1, imgLum(0.58 + x / 0.74 * 0.36, 0.47 + y * 0.45) * 0.8 + Math.max(0, bump) * 3.2) * Math.min(1, (z / c) * 1.8);
+      }
+      return { x: x, y: y, z: z, l: l };
+    }
     function buildHead() {
-      head = []; hiddenIdx.forEach(function (i) { if (cells[i]) cells[i].hide = false; }); hiddenIdx = [];
-      if (!headImg.complete || !headImg.naturalWidth || box.S < 10) return;
-      var S = box.S, off = document.createElement("canvas"); off.width = S; off.height = S;
-      var octx = off.getContext("2d"); octx.drawImage(headImg, 0, 0, S, S);
-      var data = octx.getImageData(0, 0, S, S).data;
-      function lum(x, y) {                                  // brightness 0..1 around (x, y); the neck fades out
-        x = Math.max(0, Math.min(S - 1, Math.round(x))); y = Math.max(0, Math.min(S - 1, Math.round(y)));
-        var g = data[(y * S + x) * 4 + 1], l = Math.max(0, Math.min(1, (g - 35) / 170));
-        var v = y / S; if (v > 0.84) l *= Math.max(0, 1 - (v - 0.84) / 0.16);
-        return l;
+      hiddenIdx = [];
+      if (!headImg.complete || !headImg.naturalWidth) return;
+      var off = document.createElement("canvas"); off.width = LG; off.height = LG;
+      var o = off.getContext("2d"); o.drawImage(headImg, 0, 0, LG, LG);
+      var d = o.getImageData(0, 0, LG, LG).data; lumGrid = new Float32Array(LG * LG);
+      for (var i = 0; i < LG * LG; i++) lumGrid[i] = Math.max(0, Math.min(1, (d[i * 4 + 1] - 35) / 170));
+      var LAT = 46, LON = 72, V = [], segs = [], idx = {};
+      function add(p) { V.push(p); return V.length - 1; }
+      for (var la = 0; la <= LAT; la++) for (var lo = 0; lo < LON; lo++)
+        idx[la + "," + lo] = add(headPoint(-1 + 2 * la / LAT, -Math.PI + 2 * Math.PI * lo / LON));
+      for (la = 0; la <= LAT; la++) for (lo = 0; lo < LON; lo++) {
+        if (la > 0 && la < LAT) segs.push([idx[la + "," + lo], idx[la + "," + ((lo + 1) % LON)]]);   // latitude rings
+        if (la < LAT) segs.push([idx[la + "," + lo], idx[(la + 1) + "," + lo]]);                      // longitude lines
       }
-      for (var y = 0; y + 5 <= S; y += HSY) for (var x = 0; x + 3 <= S; x += HSX) {
-        var l = (lum(x + 1, y + 1) + lum(x + 1, y + 3) + lum(x + 2, y + 2)) / 3;
-        if (l > 0.07) head.push({ x: box.x0 + x, y: box.y0 + y, l: l, v: Math.random() < 0.5 ? 0 : 1 });
+      // neck: a short tapering cylinder under the jaw
+      var NK = 30, prev = null;
+      for (var ny = 0; ny <= 5; ny++) {
+        var yy = 0.88 + ny * 0.12, rr = 0.34 - ny * 0.01, ring = [];
+        for (lo = 0; lo < NK; lo++) { var t = 2 * Math.PI * lo / NK; ring.push(add({ x: rr * Math.sin(t), y: yy, z: rr * 1.05 * Math.cos(t) - 0.05, l: 0, neck: ny / 5 })); }
+        for (lo = 0; lo < NK; lo++) { segs.push([ring[lo], ring[(lo + 1) % NK]]); if (prev) segs.push([prev[lo], ring[lo]]); }
+        prev = ring;
       }
-      // hide the coarse background digits that sit inside the head's silhouette
-      var c0 = Math.max(0, Math.floor((box.x0 - OX) / CW)), c1 = Math.min(cols - 1, Math.ceil((box.x0 + S - OX) / CW));
-      var r0 = Math.max(0, Math.floor((box.y0 - OY) / CH)), r1 = Math.min(rows - 1, Math.ceil((box.y0 + S - OY) / CH));
-      for (var r = r0; r <= r1; r++) for (var c = c0; c <= c1; c++) {
-        var px = c * CW + OX + PX * 1.5 - box.x0, py = r * CH + OY + PX * 2.5 - box.y0;
-        if (px < 0 || py < 0 || px >= S || py >= S) continue;
-        if (lum(px, py) > 0.1 || lum(px - 4, py) > 0.1 || lum(px + 4, py) > 0.1) { cells[r * cols + c].hide = true; hiddenIdx.push(r * cols + c); }
-      }
+      // ears: small upright loops on each side
+      [-1, 1].forEach(function (side) {
+        var ear = [];
+        for (var e = 0; e < 16; e++) { var t = 2 * Math.PI * e / 16; ear.push(add({ x: side * (0.78 + 0.05 * Math.cos(t)), y: 0.02 + 0.2 * Math.sin(t), z: -0.05 + 0.1 * Math.cos(t), l: 0 })); }
+        for (e = 0; e < 16; e++) segs.push([ear[e], ear[(e + 1) % 16]]);
+      });
+      // the eyes sit on the surface where they are in the image
+      var eyes = [{ u: 0.425, v: 0.492 }, { u: 0.725, v: 0.492 }].map(function (e) {
+        var x = (e.u - 0.58) / 0.36 * 0.74, y = (e.v - 0.47) / 0.45, best = null;
+        for (var lo2 = -1.2; lo2 <= 1.2; lo2 += 0.01) { var p = headPoint(y, lo2); if (!best || Math.abs(p.x - x) < Math.abs(best.x - x)) best = p; }
+        return { x: best.x, y: best.y, z: best.z + 0.02 };
+      });
+      mesh = { V: V, segs: segs, eyes: eyes, P: new Float32Array(V.length * 3) };
+      head = [1];
     }
-    function headColor(n) { return css(mixRGB(LOW, HIGH, Math.pow(n.l, 1.3))); }
-    function paintHeadDigit(n) {
-      hctx.fillStyle = headColor(n);
-      var g = GLYPH[n.v];
-      for (var r = 0; r < 5; r++) for (var k = 0; k < 3; k++) if (g[r][k] === "1") hctx.fillRect(n.x + k, n.y + r, 1, 1);
-    }
-    function drawHead() {
+    var BUCKETS = 7, bucketCol = [];
+    for (var bk = 0; bk < BUCKETS; bk++) bucketCol.push(css(mixRGB(LOW, HIGH, Math.pow((bk + 0.5) / BUCKETS, 1.2))));
+    var spinning = !matchMedia("(prefers-reduced-motion: reduce)").matches, SPIN = 20000, spinT0 = performance.now(), lastNow = 0;
+    function drawHead(now) {
+      now = now || lastNow || performance.now(); lastNow = now;
       hctx.clearRect(0, 0, innerWidth, innerHeight);
-      if (!burst) head.forEach(paintHeadDigit);
-    }
-    function flickerHead(count) {
-      if (burst || !head.length) return;
-      for (var n = 0; n < count; n++) {
-        var d = head[Math.floor(Math.random() * head.length)]; d.v = 1 - d.v;
-        hctx.clearRect(d.x, d.y, 3, 5); paintHeadDigit(d);
+      if (!mesh || burst) return;
+      var yaw = (spinning ? ((now - spinT0) / SPIN) * Math.PI * 2 : 0) + lean.x * 0.012, pitch = lean.y * 0.012;
+      var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      var sc = box.S * 0.43, ox = face.x, oy = face.y - box.S * 0.03, F = 3.4, V = mesh.V, P = mesh.P;
+      for (var i = 0; i < V.length; i++) {
+        var v = V[i], x1 = v.x * cy + v.z * sy, z1 = -v.x * sy + v.z * cy;
+        var y2 = v.y * cp - z1 * sp, z2 = v.y * sp + z1 * cp, k = F / (F - z2);
+        P[i * 3] = ox + x1 * sc * k; P[i * 3 + 1] = oy + y2 * sc * k;
+        var facing = z2 / 0.86, b = 0.1 + 0.32 * Math.max(0, facing) + 0.7 * v.l;
+        if (facing < 0) b *= 0.5;
+        if (v.neck !== undefined) b *= 1 - v.neck * 0.85;                       // the neck fades out
+        P[i * 3 + 2] = Math.max(0, Math.min(0.999, b));
       }
-    }
-
-    // ---- Motion like the old robot: red pupils follow the cursor, the head leans toward it, and it blinks ----
-    var ev = document.createElement("canvas"), ectx = ev.getContext("2d");
-    ev.id = "eyes"; ev.setAttribute("aria-hidden", "true"); hv.after(ev);
-    var EYES = [{ u: 0.425, v: 0.492 }, { u: 0.725, v: 0.492 }];   // eye centres as a fraction of the image
-    var look = { x: 0, y: 0 }, lean = { x: 0, y: 0, tx: 0, ty: 0 }, blinking = false, eyeBox = null, leanRun = false;
-    function drawEyes() {
-      if (eyeBox) ectx.clearRect(eyeBox.x - 2, eyeBox.y - 2, eyeBox.w + 4, eyeBox.h + 4);
-      if (burst || !head.length) { eyeBox = null; return; }
-      var S = box.S, rx = S * 0.07, ry = S * 0.035, pr = S * 0.02;
-      eyeBox = { x: box.x0 + EYES[0].u * S - rx - 4, y: box.y0 + EYES[0].v * S - ry - 4, w: (EYES[1].u - EYES[0].u) * S + rx * 2 + 8, h: ry * 2 + 8 };
-      EYES.forEach(function (e) {
-        var cx = box.x0 + e.u * S, cy = box.y0 + e.v * S;
-        if (blinking) {                                      // closed: a dark lid with one bright lash line
-          ectx.fillStyle = "#0a0d0b"; ectx.fillRect(Math.round(cx - rx), Math.round(cy - ry), Math.round(rx * 2), Math.round(ry * 2));
-          ectx.fillStyle = "#9dff7a"; ectx.fillRect(Math.round(cx - rx * 0.8), Math.round(cy), Math.round(rx * 1.6), 1);
-          return;
-        }
-        var px = cx + look.x * rx * 0.45, py = cy + look.y * ry * 0.45;
-        ectx.fillStyle = "#fd0002";
-        for (var y = py - pr; y <= py + pr; y += HSY) for (var x = px - pr; x <= px + pr; x += HSX) {
-          if (Math.hypot(x - px, y - py) > pr) continue;
-          var g = GLYPH[(Math.round(x) + Math.round(y)) % 2 ? 1 : 0];
-          for (var r = 0; r < 5; r++) for (var k = 0; k < 3; k++) if (g[r][k] === "1") ectx.fillRect(Math.round(x) + k, Math.round(y) + r, 1, 1);
-        }
+      var paths = []; for (var q = 0; q < BUCKETS; q++) paths.push([]);
+      mesh.segs.forEach(function (s) {
+        var a = s[0] * 3, c = s[1] * 3, b = (P[a + 2] + P[c + 2]) / 2;
+        if (b < 0.04) return;
+        paths[Math.min(BUCKETS - 1, (b * BUCKETS) | 0)].push(P[a], P[a + 1], P[c], P[c + 1]);
+      });
+      hctx.lineWidth = 1;
+      for (q = 0; q < BUCKETS; q++) {
+        var L = paths[q]; if (!L.length) continue;
+        hctx.strokeStyle = bucketCol[q]; hctx.beginPath();
+        for (var j = 0; j < L.length; j += 4) { hctx.moveTo(L[j], L[j + 1]); hctx.lineTo(L[j + 2], L[j + 3]); }
+        hctx.stroke();
+      }
+      // bright nodes where the mesh is most lit, like points of light on the wireframe
+      hctx.fillStyle = "#c8ffb0";
+      for (i = 0; i < V.length; i++) if (P[i * 3 + 2] > 0.62) hctx.fillRect(P[i * 3] - 0.8, P[i * 3 + 1] - 0.8, 1.6, 1.6);
+      // the red eyes, only while they face the viewer; the pupils shift toward the cursor
+      mesh.eyes.forEach(function (e) {
+        var x1 = e.x * cy + e.z * sy, z1 = -e.x * sy + e.z * cy, y2 = e.y * cp - z1 * sp, z2 = e.y * sp + z1 * cp, k = F / (F - z2);
+        var facing = z2 / 0.86; if (facing < 0.25) return;
+        var X = ox + x1 * sc * k + look.x * box.S * 0.006, Y = oy + y2 * sc * k + look.y * box.S * 0.004, r = box.S * 0.017 * k;
+        var alpha = Math.min(1, (facing - 0.25) * 2.5);
+        if (blinking) { hctx.fillStyle = "rgba(157, 255, 122," + alpha + ")"; hctx.fillRect(X - r * 1.4, Y, r * 2.8, 1.5); return; }
+        var g = hctx.createRadialGradient(X, Y, 0, X, Y, r * 2.2);
+        g.addColorStop(0, "rgba(255, 60, 50," + alpha + ")"); g.addColorStop(0.45, "rgba(253, 0, 2," + (alpha * 0.85) + ")"); g.addColorStop(1, "rgba(253, 0, 2, 0)");
+        hctx.fillStyle = g; hctx.beginPath(); hctx.arc(X, Y, r * 2.2, 0, Math.PI * 2); hctx.fill();
       });
     }
+    function flickerHead() {}
+
+    // ---- The eyes follow the cursor, the head leans toward it, and it blinks ----
+    var ev = document.createElement("canvas"), ectx = ev.getContext("2d");
+    ev.id = "eyes"; ev.setAttribute("aria-hidden", "true"); hv.after(ev);
+    var look = { x: 0, y: 0 }, lean = { x: 0, y: 0, tx: 0, ty: 0 }, blinking = false, eyeBox = null, leanRun = false;
+    function drawEyes() { if (!spinning) drawHead(); }                  // the eyes are drawn with the head
     function lookAt(x, y) {
       var dx = x - face.x, dy = y - face.y, len = Math.hypot(dx, dy) || 1, reach = Math.min(1, len / 300);
       look.x = dx / len * reach; look.y = dy / len * reach;
-      lean.tx = look.x * 14; lean.ty = look.y * 9;            // the whole head leans a few pixels toward the cursor
-      drawEyes();
+      lean.tx = look.x * 14; lean.ty = look.y * 9;
       if (!leanRun) { leanRun = true; requestAnimationFrame(stepLean); }
     }
-    // The head turns a full 360 degrees around its vertical axis, slowly, like a hologram on a
-    // turntable; the lean toward the cursor rides on top. Reduced motion keeps it facing forward.
-    var spinning = !matchMedia("(prefers-reduced-motion: reduce)").matches, SPIN = 20000, spinDeg = 0, spinT0 = performance.now();
-    function applyHead() {
-      var tr = "perspective(1600px) translate(" + lean.x.toFixed(2) + "px," + lean.y.toFixed(2) + "px) rotateY(" + spinDeg.toFixed(2) + "deg)";
-      var origin = face.x.toFixed(0) + "px " + face.y.toFixed(0) + "px";
-      hv.style.transformOrigin = origin; ev.style.transformOrigin = origin;
-      hv.style.transform = tr; ev.style.transform = tr;
-    }
     function spinLoop(now) {
-      if (!document.hidden && hv.style.opacity !== "0") { spinDeg = ((now - spinT0) / SPIN * 360) % 360; applyHead(); }
+      if (!document.hidden && hv.style.opacity !== "0") drawHead(now);
       requestAnimationFrame(spinLoop);
     }
     if (spinning) requestAnimationFrame(spinLoop);
     function stepLean() {
       lean.x += (lean.tx - lean.x) * 0.15; lean.y += (lean.ty - lean.y) * 0.15;
-      applyHead();
+      if (!spinning) drawHead();
       if (Math.abs(lean.tx - lean.x) + Math.abs(lean.ty - lean.y) > 0.05) requestAnimationFrame(stepLean); else leanRun = false;
     }
     addEventListener("pointermove", function (e) { lookAt(e.clientX, e.clientY); }, { passive: true });
