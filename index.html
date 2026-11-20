@@ -415,7 +415,6 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
   </section>
 </div>
 
-<p class="credit">Background head: <a href="https://www.ir-ltd.net/" target="_blank" rel="noopener">&ldquo;Infinite, 3D Head Scan&rdquo; by Lee Perry-Smith</a>, via triplegangers.com, licensed <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>; shown as a wireframe.</p>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Project image"><img alt=""></div>
 
@@ -440,8 +439,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     function css(c) { return "rgb(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + ")"; }
     function rand() { return Math.random() < 0.3 ? -1 : (Math.random() < 0.5 ? 0 : 1); }
 
-    // ---- Head: a real 3D head scan (data/head.json, from "Infinite, 3D Head Scan" by Lee Perry-Smith,
-    //      CC BY 3.0) drawn as a green wireframe hologram, lit from the front, turning 360 degrees ----
+    // ---- Head: removed. These stubs keep the eyes, blink and lean code harmless with no head ----
     var face = { x: 0, y: 0, s: 1 }, burst = false;
     var hv = document.createElement("canvas"), hctx = hv.getContext("2d");
     hv.id = "head"; hv.setAttribute("aria-hidden", "true"); cv.after(hv);
@@ -452,30 +450,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
       face.s = box.S / 2.45; face.x = w / 2; face.y = h / 2;
     }
     function buildHead() {}
-    // load the scan: int16 positions, int8 normals, uint16 edge pairs
-    fetch("data/head.json").then(function (r) { return r.json(); }).then(function (j) {
-      var raw = atob(j.b64), bytes = new Uint8Array(raw.length);
-      for (var bi = 0; bi < raw.length; bi++) bytes[bi] = raw.charCodeAt(bi);
-      var buf = bytes.buffer;
-      var dv = new DataView(buf), N = dv.getUint32(4, true), E = dv.getUint32(8, true), off = 12;
-      var pos = new Int16Array(buf.slice(off, off + N * 6)); off += N * 6;
-      var nor = new Int8Array(buf.slice(off, off + N * 3)); off += N * 3; if (off % 2) off++;
-      var edg = new Uint16Array(buf.slice(off, off + E * 4));
-      var X = new Float32Array(N), Y = new Float32Array(N), Z = new Float32Array(N), NX = new Float32Array(N), NY = new Float32Array(N), NZ = new Float32Array(N);
-      for (var i = 0; i < N; i++) {
-        X[i] = pos[i * 3] / 32767; Y[i] = pos[i * 3 + 1] / 32767; Z[i] = pos[i * 3 + 2] / 32767;
-        NX[i] = nor[i * 3] / 127; NY[i] = nor[i * 3 + 1] / 127; NZ[i] = nor[i * 3 + 2] / 127;
-      }
-      // eyes: centred on each eyelid patch of the scan (measured from its geometry), on the surface
-      var eyes = [[-0.156, 0.394], [0.114, 0.391]].map(function (e) {
-        var best = -1, bd = Infinity;
-        for (var k = 0; k < N; k++) if (Z[k] > 0.2) { var d = Math.hypot(X[k] - e[0], Y[k] - e[1]); if (d < bd) { bd = d; best = k; } }
-        return { x: X[best], y: Y[best], z: Z[best] + 0.02 };
-      });
-      mesh = { N: N, E: E, X: X, Y: Y, Z: Z, NX: NX, NY: NY, NZ: NZ, edg: edg, eyes: eyes,
-               PX: new Float32Array(N), PY: new Float32Array(N), B: new Float32Array(N), F: new Float32Array(N) };
-      head = [1]; drawHead();
-    });
+    // the background head was removed; nothing is loaded or drawn (mesh stays null)
     var BUCKETS = 8, bucketCol = [];
     for (var bk = 0; bk < BUCKETS; bk++) bucketCol.push(css(mixRGB(LOW, HIGH, Math.pow((bk + 0.5) / BUCKETS, 1.15))));
     var spinning = !matchMedia("(prefers-reduced-motion: reduce)").matches && !/[?&]still(&|$)/.test(location.search), SPIN = 20000, spinT0 = performance.now(), lastNow = 0;
@@ -548,7 +523,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
       if (!document.hidden && hv.style.opacity !== "0" && (!light || (frameSkip++ & 1))) drawHead(now);
       requestAnimationFrame(spinLoop);
     }
-    if (spinning) requestAnimationFrame(spinLoop);
+
     function stepLean() {
       lean.x += (lean.tx - lean.x) * 0.15; lean.y += (lean.ty - lean.y) * 0.15;
       if (!spinning) drawHead();
