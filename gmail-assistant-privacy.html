@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gmail Job Assistant – Privacy Policy</title>
+<meta name="description" content="Privacy policy for Gmail Job Assistant, a personal tool by M Balasubramanya.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0a0d0b; --surface: #111613; --ink: #c9d6c4; --bright: #f8f8f8;
+  --muted: #8fb284; --line: #232b26; --accent: #5dd62c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 48px 16px 80px; }
+a { color: var(--accent); }
+.back { font: 14px "IBM Plex Mono", ui-monospace, monospace; text-decoration: none; }
+h1 { color: var(--bright); font-size: 30px; line-height: 1.2; margin: 24px 0 6px; }
+h2 { color: var(--bright); font-size: 19px; margin: 36px 0 8px; }
+.meta { color: var(--muted); font: 14px "IBM Plex Mono", ui-monospace, monospace; margin: 0 0 24px; }
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; }
+.summary p { margin: 0; }
+ul { padding-left: 22px; }
+li { margin: 6px 0; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 14px; color: var(--bright); }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← M Balasubramanya</a>
+  <h1>Gmail Job Assistant: Privacy Policy</h1>
+  <p class="meta">Last updated 22 November 2026</p>
+
+  <div class="summary">
+    <p>Gmail Job Assistant is a personal, open-source tool. Its only user is its author, who runs it on
+    their own computer to sort their own job-search email. It reads mail and creates drafts; it never
+    sends email. Your data is not sold, shared for advertising, or used to train AI models by this app.</p>
+  </div>
+
+  <h2>Who runs it</h2>
+  <p>The app is written and operated by M Balasubramanya. The source code is public at
+  <a href="https://github.com/balu0327/gmail-job-assistant">github.com/balu0327/gmail-job-assistant</a>.
+  Anyone who installs it runs their own copy with their own Google sign-in; no data passes through the author.</p>
+
+  <h2>What it accesses in Google</h2>
+  <ul>
+    <li><strong>Read your email</strong> (<code>gmail.readonly</code>): sender, subject, date and text of recent
+      messages, to decide which are job-search emails and what action they need.</li>
+    <li><strong>Create drafts</strong> (<code>gmail.compose</code>): when you ask for a reply, it is saved to your
+      Gmail Drafts folder. The app has no function that sends mail; you send drafts yourself.</li>
+  </ul>
+  <p>It does not delete, archive, label or forward any email, and it does not access contacts, files or other Google data.</p>
+
+  <h2>Where your data goes</h2>
+  <ul>
+    <li><strong>Your computer.</strong> The app runs locally. It keeps a small local database of sorted emails
+      (sender, subject, date, category, company, role and a one-line summary), run logs that contain timing
+      and counts but no email text, and a status file for its local dashboard.</li>
+    <li><strong>An AI model provider.</strong> To sort an email or draft a reply, the email's sender, subject and
+      up to 4,000 characters of its text are sent to NVIDIA's hosted model API, or to a model running on the
+      same computer (Ollama) if configured. NVIDIA's handling of those requests is governed by NVIDIA's own terms.
+      Emails from known bulk job-alert senders are sorted by fixed rules and are not sent to any model.</li>
+    <li><strong>Optional monitoring (off unless configured).</strong> If Langfuse monitoring is turned on, it
+      receives timing, token counts, model names and categories. Email text is included only if that is
+      explicitly enabled.</li>
+  </ul>
+  <p>Nothing else receives your data. It is not sold, rented, shared with advertisers or used for advertising.</p>
+
+  <h2>Google API Services User Data Policy</h2>
+  <p>Information received from Google APIs is used only to provide the features described above: sorting job-search
+  email, tracking applications and drafting replies for the user to review. It is not transferred to others except
+  to the model provider as described above, which is needed to provide those features, and it is not used to train
+  AI models by this app.</p>
+
+  <h2>How long it is kept, and how to remove it</h2>
+  <ul>
+    <li>Local data stays until you delete it: remove <code>tracker.db</code>, <code>logs/</code> and
+      <code>status/</code> from the app's folder.</li>
+    <li>To remove the app's access to your Gmail, go to
+      <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a> and remove
+      "Gmail Assistant", or delete <code>token.json</code> from the app's folder.</li>
+    <li>Drafts it created are ordinary Gmail drafts; delete them in Gmail as usual.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy: open an issue at
+  <a href="https://github.com/balu0327/gmail-job-assistant/issues">github.com/balu0327/gmail-job-assistant/issues</a>.</p>
+</main>
+</body>
+</html>
