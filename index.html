@@ -119,7 +119,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 
 /* Experience: a timeline whose line draws down as you scroll, with a card per role */
 .timeline { position: relative; display: grid; gap: 28px; padding-left: 34px; }
-.timeline::before { content: ""; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--accent);
+.timeline::before { content: ""; position: absolute; left: 9px; top: var(--ls, 6px); height: calc(var(--le, 100%) - var(--ls, 6px)); width: 2px; background: var(--accent);
   box-shadow: 0 0 10px rgba(93, 214, 44, 0.6); transform-origin: top; transform: scaleY(var(--line, 0)); }
 .xp { position: relative; padding: 26px 30px; }
 .xp::before { content: ""; position: absolute; left: -31px; top: 28px; width: 14px; height: 14px; border-radius: 50%; background: #000;
@@ -128,7 +128,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .xp.lit { border-color: rgba(93, 214, 44, 0.42); box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 10px 30px rgba(0,0,0,0.45), 0 0 34px -10px rgba(93, 214, 44, 0.55); }
 .xp.lit::before { background: var(--accent); border-color: #d8ffc4; box-shadow: 0 0 0 5px rgba(93, 214, 44, 0.16), 0 0 18px rgba(93, 214, 44, 0.9); }
 /* the signal: a bright head riding the end of the drawn line */
-.packet { position: absolute; left: 4px; top: calc(6px + var(--line, 0) * (100% - 12px)); width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+.packet { position: absolute; left: 4px; top: calc(var(--ls, 6px) + var(--line, 0) * (var(--le, 100%) - var(--ls, 6px))); width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
   background: #e9ffd9; box-shadow: 0 0 8px 2px #5dd62c, 0 0 26px 8px rgba(93, 214, 44, 0.45); opacity: var(--packet, 0); pointer-events: none; }
 .xp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
 .xp h3 { margin: 0; font-size: 1.3rem; font-weight: 650; color: var(--accent); }
@@ -1266,11 +1266,14 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
     // timeline line grows with the scroll
     var tl = document.getElementById("timeline");
     var roles = tl ? Array.prototype.slice.call(tl.querySelectorAll(".xp")) : [];
+    var DOT = 35;                                  // a role's dot centre, from the top of its card
     function setLine(v) {
+      var ls = roles[0].offsetTop + DOT, le = roles[roles.length - 1].offsetTop + DOT;
+      tl.style.setProperty("--ls", ls + "px"); tl.style.setProperty("--le", le + "px");
       tl.style.setProperty("--line", v.toFixed(4));
       tl.style.setProperty("--packet", v > 0 && v < 1 ? "1" : "0");
       roles.forEach(function (el) {
-        var on = v >= (el.offsetTop + 35) / tl.offsetHeight;
+        var on = v >= (el.offsetTop + DOT - ls) / Math.max(1, le - ls) - 0.001;
         el.classList.toggle("lit", on);
         if (on) reveal(el);                       // each card rises in as the signal reaches it
       });
