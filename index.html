@@ -249,9 +249,13 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
 #panel-exp .timeline { max-width: 960px; }
 @media (prefers-reduced-motion: reduce) { dialog.panel[open], dialog.panel[open]::after { animation: none; } }
 
+.panel-proj .projects { max-width: 1040px; margin: 0 auto; }
+@media (max-width: 820px) { .panel-proj .projects { gap: 18px; } }
+
 /* Lightbox for project images */
-.lightbox { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, 0.88); opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; cursor: zoom-out; }
-.lightbox.open { opacity: 1; visibility: visible; }
+dialog.lightbox { padding: 0; margin: auto; border: 0; background: transparent; max-width: none; max-height: none; cursor: zoom-out; overflow: visible; }
+dialog.lightbox::backdrop { background: rgba(0, 0, 0, 0.88); }
+dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
 .lightbox img { max-width: min(1280px, 100%); max-height: 88vh; border: 1px solid rgba(93, 214, 44, 0.5); border-radius: 10px; box-shadow: 0 0 40px rgba(93, 214, 44, 0.2); }
 
 /* Radar: the second screen, a glowing dial with a rotating sweep */
@@ -357,6 +361,7 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
     <nav class="navbtns" aria-label="About me">
       <button class="navbtn" type="button" data-open="panel-skills"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" /><circle cx="8" cy="8" r="3" /><path d="M8 8 13 3.5" /><circle class="dot" cx="10.6" cy="6" r="1" /></svg><span>Skills</span></button>
       <button class="navbtn" type="button" data-open="panel-exp"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.8" y="5" width="12.4" height="8.6" rx="1" /><path d="M5.8 5V3.2h4.4V5M1.8 8.6h12.4" /></svg><span>Experience</span></button>
+      <button class="navbtn" type="button" data-open="panel-proj"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.8" y="2.6" width="12.4" height="10.8" rx="1" /><path d="M1.8 5.4h12.4M5 8.6l-1.6 1.4L5 11.4M11 8.6l1.6 1.4L11 11.4" /></svg><span>Projects</span></button>
       <button class="navbtn" type="button" data-open="panel-me"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.2" r="2.8" /><path d="M2.6 14.2c.6-3 2.8-4.6 5.4-4.6s4.8 1.6 5.4 4.6" /></svg><span>Who am I</span></button>
     </nav>
   </aside>
@@ -365,11 +370,66 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
 
 
 
-<div class="work" id="work">
 
+
+<dialog class="panel panel-skills" id="panel-skills" aria-labelledby="panel-skills-t">
+  <div class="panel-bar">
+    <h2 id="panel-skills-t">Skills</h2>
+    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
+  </div>
+  <div class="panel-body">
+    <div class="radar-box">
+      <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
+      <div class="radar-status" id="radar-status" aria-hidden="true">SCANNING FOR SKILLS</div>
+    </div>
+  </div>
+</dialog>
+<dialog class="panel" id="panel-exp" aria-labelledby="panel-exp-t">
+  <div class="panel-bar">
+    <h2 id="panel-exp-t">Experience</h2>
+    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
+  </div>
+  <div class="panel-body">
+  <section aria-labelledby="exp-title">
+    <h2 class="sec-title sr-only" id="exp-title"><span data-decode>EXPERIENCE</span><span class="caret" aria-hidden="true"></span></h2>
+    <div class="timeline" id="timeline">
+      <span class="packet" aria-hidden="true"></span>
+      <article class="xp glass fx">
+        <div class="xp-head"><h3 data-decode>AdvoHQ</h3><span class="when">Jan 2026 &ndash; Present</span></div>
+        <div class="title">Software Development Intern &middot; Bangalore</div>
+        <ul>
+          <li>Develop backend and frontend features for an AI-powered legal technology platform covering case, document and client management.</li>
+          <li>Deploy the frontend and the Dockerised backend as separate services on Render with Supabase PostgreSQL.</li>
+        </ul>
+      </article>
+      <article class="xp glass fx">
+        <div class="xp-head"><h3 data-decode>NanoFarm</h3><span class="when">Oct 2025 &ndash; Jan 2026</span></div>
+        <div class="title">Software Development Intern &middot; Bangalore</div>
+        <ul>
+          <li>Built and enhanced application features and integrated third-party APIs into production workflows.</li>
+          <li>Improved application performance through code optimisation and feature refinement.</li>
+        </ul>
+      </article>
+      <article class="xp glass fx">
+        <div class="xp-head"><h3 data-decode>Edutainer</h3><span class="when">Feb 2025 &ndash; May 2025</span></div>
+        <div class="title">Software Development Intern &middot; Bangalore</div>
+        <ul>
+          <li>Developed and maintained full-stack web applications for client projects using HTML, CSS, JavaScript and Node.js.</li>
+          <li>Implemented responsive frontend interfaces and backend REST APIs.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+  </div>
+</dialog>
+<dialog class="panel panel-proj" id="panel-proj" aria-labelledby="panel-proj-t">
+  <div class="panel-bar">
+    <h2 id="panel-proj-t">Projects</h2>
+    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
+  </div>
+  <div class="panel-body">
   <section aria-labelledby="proj-title" id="projects">
-    <p class="eyebrow"><b>01</b> Things I&rsquo;ve built</p>
-    <h2 class="sec-title" id="proj-title"><span data-decode>PROJECTS</span><span class="caret" aria-hidden="true"></span></h2>
+    <h2 class="sec-title sr-only" id="proj-title"><span data-decode>PROJECTS</span><span class="caret" aria-hidden="true"></span></h2>
     <div class="projects">
       <article class="proj wide glass fx">
         <div class="win-bar" aria-hidden="true"><i></i><i></i><i></i><span>advohq.in</span></div>
@@ -428,62 +488,6 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
         </div>
       </article>
     </div>
-    <div class="reel-ui" aria-hidden="true">
-      <span class="reel-count"><b id="reel-now">01</b> / 04</span>
-      <span class="reel-bar"><i></i></span>
-      <span class="reel-hint">Keep scrolling</span>
-    </div>
-  </section>
-</div>
-
-
-<dialog class="panel panel-skills" id="panel-skills" aria-labelledby="panel-skills-t">
-  <div class="panel-bar">
-    <h2 id="panel-skills-t">Skills</h2>
-    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
-  </div>
-  <div class="panel-body">
-    <div class="radar-box">
-      <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
-      <div class="radar-status" id="radar-status" aria-hidden="true">SCANNING FOR SKILLS</div>
-    </div>
-  </div>
-</dialog>
-<dialog class="panel" id="panel-exp" aria-labelledby="panel-exp-t">
-  <div class="panel-bar">
-    <h2 id="panel-exp-t">Experience</h2>
-    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
-  </div>
-  <div class="panel-body">
-  <section aria-labelledby="exp-title">
-    <h2 class="sec-title sr-only" id="exp-title"><span data-decode>EXPERIENCE</span><span class="caret" aria-hidden="true"></span></h2>
-    <div class="timeline" id="timeline">
-      <span class="packet" aria-hidden="true"></span>
-      <article class="xp glass fx">
-        <div class="xp-head"><h3 data-decode>AdvoHQ</h3><span class="when">Jan 2026 &ndash; Present</span></div>
-        <div class="title">Software Development Intern &middot; Bangalore</div>
-        <ul>
-          <li>Develop backend and frontend features for an AI-powered legal technology platform covering case, document and client management.</li>
-          <li>Deploy the frontend and the Dockerised backend as separate services on Render with Supabase PostgreSQL.</li>
-        </ul>
-      </article>
-      <article class="xp glass fx">
-        <div class="xp-head"><h3 data-decode>NanoFarm</h3><span class="when">Oct 2025 &ndash; Jan 2026</span></div>
-        <div class="title">Software Development Intern &middot; Bangalore</div>
-        <ul>
-          <li>Built and enhanced application features and integrated third-party APIs into production workflows.</li>
-          <li>Improved application performance through code optimisation and feature refinement.</li>
-        </ul>
-      </article>
-      <article class="xp glass fx">
-        <div class="xp-head"><h3 data-decode>Edutainer</h3><span class="when">Feb 2025 &ndash; May 2025</span></div>
-        <div class="title">Software Development Intern &middot; Bangalore</div>
-        <ul>
-          <li>Developed and maintained full-stack web applications for client projects using HTML, CSS, JavaScript and Node.js.</li>
-          <li>Implemented responsive frontend interfaces and backend REST APIs.</li>
-        </ul>
-      </article>
-    </div>
   </section>
   </div>
 </dialog>
@@ -496,7 +500,7 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
   </div>
 </dialog>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Project image"><img alt=""></div>
+<dialog class="lightbox" id="lightbox" aria-label="Project image"><img alt=""></dialog>
 
 
 <script>
@@ -1155,6 +1159,13 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
         reveal(el);
       });
     }, { threshold: 0.18, rootMargin: "0px 0px -8% 0px" });
+    // reveal every card inside a panel, one after another
+    window.__revealIn = function (box) {
+      box.querySelectorAll(".fx").forEach(function (el, k) {
+        el.classList.remove("in");
+        setTimeout(function () { reveal(el); }, 120 + k * 130);
+      });
+    };
     function reveal(el) {
       if (el.classList.contains("in")) return;
       el.querySelectorAll("li").forEach(function (li, k) { li.style.transitionDelay = (0.25 + k * 0.09) + "s"; });
@@ -1211,10 +1222,9 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
     // lightbox
     var lb = document.getElementById("lightbox"), lbImg = lb.querySelector("img");
     document.querySelectorAll(".shot img").forEach(function (img) {
-      img.addEventListener("click", function () { lbImg.src = img.src; lbImg.alt = img.alt; lb.classList.add("open"); });
+      img.addEventListener("click", function () { lbImg.src = img.src; lbImg.alt = img.alt; lb.showModal(); });
     });
-    lb.addEventListener("click", function () { lb.classList.remove("open"); });
-    addEventListener("keydown", function (e) { if (e.key === "Escape") lb.classList.remove("open"); });
+    lb.addEventListener("click", function () { lb.close(); });
   })();
 </script>
 <script>
@@ -1230,10 +1240,12 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
         requestAnimationFrame(function () {
           if (d.id === "panel-skills" && window.__radarStart) window.__radarStart();
           if (d.id === "panel-exp" && window.__timelineRun) window.__timelineRun();
+          if (d.id === "panel-proj" && window.__revealIn) window.__revealIn(d);
         });
       });
     });
     document.querySelectorAll("dialog.panel").forEach(function (d) {
+      // (the image viewer is its own dialog and doesn't use this)
       d.addEventListener("close", function () { root.classList.remove("panel-open"); if (opener) opener.focus(); });
       d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
     });
@@ -1289,41 +1301,6 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
       return function () { clearTimeout(glitchTimer); if (gsplit) gsplit.revert(); split.revert(); };
     });
 
-    // The one big moment: on desktop the Projects section pins and the cards travel sideways
-    // with the scroll, each screenshot drifting inside its frame; a counter tracks the reel.
-    mm.add("(min-width: 1000px) and (prefers-reduced-motion: no-preference)", function () {
-      var sec = document.getElementById("projects"), track = sec.querySelector(".projects");
-      var cards = gsap.utils.toArray(".proj", track), imgs = cards.map(function (c) { return c.querySelector(".shot img"); });
-      var now = document.getElementById("reel-now");
-      sec.classList.add("reel");
-      function dist() { return Math.max(0, track.scrollWidth - sec.clientWidth); }
-      // counter, progress bar and image drift follow the cards as they actually move (after smoothing)
-      var tween = null;
-      function follow() {
-        if (!tween) return;                       // GSAP renders once while the tween is being created
-        sec.style.setProperty("--reel", tween.progress().toFixed(4));
-        var mid = innerWidth / 2, best = 0, bestD = Infinity;
-        cards.forEach(function (c, i) {
-          var r = c.getBoundingClientRect(), d = r.left + r.width / 2 - mid;
-          if (imgs[i]) imgs[i].style.setProperty("--px", Math.max(-30, Math.min(30, -d * 0.05)).toFixed(1) + "px");
-          if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = i; }
-        });
-        now.textContent = ("0" + (best + 1)).slice(-2);
-      }
-      tween = gsap.to(track, {
-        x: function () { return -dist(); }, ease: "none", onUpdate: follow,
-        scrollTrigger: {
-          trigger: sec, start: "top 4%", end: function () { return "+=" + dist(); },
-          pin: true, scrub: 0.8, anticipatePin: 1, invalidateOnRefresh: true
-        }
-      });
-      follow();
-      return function () {
-        tween.scrollTrigger && tween.scrollTrigger.kill(); tween.kill();
-        sec.classList.remove("reel"); gsap.set(track, { clearProps: "transform" });
-        imgs.forEach(function (im) { im && im.style.removeProperty("--px"); });
-      };
-    });
     addEventListener("load", function () { ScrollTrigger.refresh(); });
   })();
 </script>
