@@ -1323,8 +1323,7 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
   })();
 </script>
 <script>
-  // Cursor trail: a glowing green streak follows the pointer and sheds little 0s and 1s that
-  // drift down and fade. Mouse/trackpad only; off for reduced motion. Sleeps when the pointer stops.
+  // Cursor trail: a glowing green streak follows the pointer and fades behind it. Mouse/trackpad only; off for reduced motion. Sleeps when the pointer stops.
   (function () {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
     var cv = document.createElement("canvas"), ctx = cv.getContext("2d");
@@ -1338,9 +1337,6 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
       if (last) {
         var d = Math.hypot(p.x - last.x, p.y - last.y), n = Math.min(6, Math.floor(d / 6));
         for (var k = 1; k <= n; k++) pts.push({ x: last.x + (p.x - last.x) * k / (n + 1), y: last.y + (p.y - last.y) * k / (n + 1), t: now });
-        if (d > 3 && Math.random() < Math.min(0.9, d / 40))
-          bits.push({ x: p.x + (Math.random() - 0.5) * 10, y: p.y + (Math.random() - 0.5) * 10, vy: 0.4 + Math.random() * 0.9, vx: (Math.random() - 0.5) * 0.4,
-                      ch: Math.random() < 0.5 ? "0" : "1", t: now, life: 650 + Math.random() * 500, size: 10 + Math.random() * 5 });
       }
       pts.push(p); last = p;
       if (!running) { running = true; requestAnimationFrame(frame); }
@@ -1362,17 +1358,7 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
       ctx.shadowBlur = 0;
-      // the shed digits
-      ctx.font = "600 12px 'IBM Plex Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      bits = bits.filter(function (d) { return now - d.t < d.life; });
-      bits.forEach(function (d) {
-        var age = (now - d.t) / d.life;
-        d.x += d.vx; d.y += d.vy; d.vy += 0.03;
-        ctx.font = "600 " + d.size.toFixed(0) + "px 'IBM Plex Mono', monospace";
-        ctx.fillStyle = age < 0.15 ? "rgba(216, 255, 196," + (1 - age) + ")" : "rgba(93, 214, 44," + (1 - age).toFixed(3) + ")";
-        ctx.fillText(d.ch, d.x, d.y);
-      });
-      if (pts.length > 1 || bits.length) requestAnimationFrame(frame); else { running = false; ctx.clearRect(0, 0, W, H); }
+      if (pts.length > 1) requestAnimationFrame(frame); else { running = false; ctx.clearRect(0, 0, W, H); }
     }
   })();
 </script>
