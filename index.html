@@ -42,7 +42,7 @@ html.loading, html.loading body { overflow: hidden; }
 /* One page gutter: every section starts on the same left edge */
 :root { --gutter: clamp(20px, 4.5vw, 72px); --gl: calc(var(--gutter) + env(safe-area-inset-left, 0px)); --gr: calc(var(--gutter) + env(safe-area-inset-right, 0px)); }
 body {
-  margin: 0; background: var(--bg); color: var(--ink);
+  margin: 0; background: #000; color: var(--ink);
   font-family: var(--body); font-size: 1rem; line-height: 1.6;
 }
 a { color: var(--accent); text-underline-offset: 3px; }
@@ -1224,6 +1224,21 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
       img.addEventListener("click", function () { lbImg.src = img.src; lbImg.alt = img.alt; lb.showModal(); });
     });
     lb.addEventListener("click", function () { lb.close(); });
+  })();
+</script>
+<script>
+  // Keep the 0s-and-1s background to the top section only: mask the canvas so it shows from the
+  // top of the screen down to the location line, then fades to black over 56px.
+  (function () {
+    var bits = document.getElementById("bits"), end = document.querySelector(".coords");
+    if (!bits || !end) return;
+    function fit() {
+      var y = Math.round(end.getBoundingClientRect().bottom + 24), m = "linear-gradient(to bottom, #000 " + y + "px, transparent " + (y + 56) + "px)";
+      bits.style.webkitMaskImage = m; bits.style.maskImage = m;
+    }
+    fit(); addEventListener("resize", fit); addEventListener("scroll", fit, { passive: true }); addEventListener("load", fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    addEventListener("loader:done", function () { setTimeout(fit, 1600); });   // after the intro settles
   })();
 </script>
 <script>
