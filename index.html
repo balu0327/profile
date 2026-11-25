@@ -59,7 +59,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 /* Identity column */
 .id { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 40px); align-self: start; display: grid; gap: 28px; }
 .hero { grid-column: 1 / -1; display: grid; gap: 0; min-width: 0; }
-.name { font-family: var(--display); font-weight: 700; font-size: min(5rem, calc((100vw - 40px) / 18)); line-height: 1; letter-spacing: 0; }
+.name { font-family: var(--display); font-weight: 700; font-size: min(5rem, calc((100vw - 2 * var(--gutter)) / 15.6)); line-height: 1; letter-spacing: 0; }
 .name, .name span { color: #f8f8f8; }
 .name span { display: block; white-space: nowrap; }
 /* Pixel mailbox button */
@@ -207,6 +207,48 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .credit { position: relative; z-index: 1; margin: 0; padding: 0 var(--gr) 32px var(--gl); font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
 .credit a { color: var(--muted); }
 
+/* Section buttons: open Skills, Experience and Who am I as panels */
+.navbtns { display: grid; gap: 10px; width: min(265px, 100%); }
+.navbtn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; cursor: pointer; text-align: left;
+  font-family: var(--mono); font-size: 0.86rem; letter-spacing: 0.04em; color: #f8f8f8;
+  background: linear-gradient(180deg, rgba(93, 214, 44, 0.12), rgba(93, 214, 44, 0.03)), rgba(6, 10, 7, 0.6);
+  border: 1px solid rgba(93, 214, 44, 0.4); border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 6px 18px rgba(0,0,0,0.35);
+  transition: border-color .15s, background-color .15s, transform .15s; }
+.navbtn svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.4; }
+.navbtn svg .dot { fill: var(--accent); stroke: none; }
+.navbtn::after { content: ">"; margin-left: auto; color: var(--accent); transition: transform .15s; }
+.navbtn:hover, .navbtn:focus-visible { border-color: var(--accent); background-color: rgba(93, 214, 44, 0.1); transform: translateX(3px); outline: none; }
+.navbtn:hover::after, .navbtn:focus-visible::after { transform: translateX(3px); }
+.navbtn:active { transform: translateX(1px) scale(0.99); }
+
+/* Panels: open with a scan from the middle, like a terminal window powering on */
+.sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html.panel-open, html.panel-open body { overflow: hidden; }
+dialog.panel { padding: 0; margin: auto; width: min(1100px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 48px);
+  color: var(--ink); background: rgba(6, 10, 7, 0.94); border: 1px solid rgba(93, 214, 44, 0.38); border-radius: 14px;
+  box-shadow: 0 0 60px rgba(93, 214, 44, 0.14), 0 30px 80px rgba(0, 0, 0, 0.7); overflow: hidden; }
+dialog.panel[open] { display: flex; flex-direction: column; animation: panel-in .5s cubic-bezier(.2,.8,.2,1); }
+dialog.panel[open]::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; pointer-events: none;
+  background: #b6ff8f; box-shadow: 0 0 14px 3px rgba(93, 214, 44, 0.8); animation: panel-scan .6s ease-out .08s both; }
+dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(3px); }
+@keyframes panel-in { from { clip-path: inset(48% 0 48% 0); opacity: 0.4; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+@keyframes panel-scan { from { top: 0; opacity: 1; } to { top: 100%; opacity: 0; } }
+.panel-bar { display: flex; align-items: center; gap: 12px; padding: 14px 18px 14px 22px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex: none; }
+.panel-bar h2 { margin: 0; font-family: var(--display); font-size: 1.15rem; letter-spacing: 0.08em; text-transform: uppercase; color: #f8f8f8; }
+.panel-bar h2::before { content: "> "; color: var(--accent); }
+.panel-close { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer;
+  font-family: var(--mono); font-size: 0.8rem; color: #f8f8f8; background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 8px; transition: border-color .15s; }
+.panel-close:hover, .panel-close:focus-visible { border-color: var(--accent); outline: none; }
+.panel-close kbd { font: inherit; font-size: 0.7rem; color: var(--muted); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; padding: 0 5px; }
+.panel-body { overflow: auto; overscroll-behavior: contain; padding: clamp(20px, 4vw, 44px); flex: 1; min-height: 120px; }
+.panel-skills .panel-body { display: grid; place-items: center; }
+.panel-skills .radar-box { width: min(640px, 100%, calc(100dvh - 210px)); margin: 0; }
+.panel-skills .radar-status { font-size: 0.82rem; margin-top: 4px; }
+#panel-exp .timeline { max-width: 960px; }
+@media (prefers-reduced-motion: reduce) { dialog.panel[open], dialog.panel[open]::after { animation: none; } }
+
 /* Lightbox for project images */
 .lightbox { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, 0.88); opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; cursor: zoom-out; }
 .lightbox.open { opacity: 1; visibility: visible; }
@@ -235,6 +277,15 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 }
 @media (max-width: 600px) {
   .xp { padding: 22px 20px; } .proj-body { padding: 20px; }
+  .pxbtns, .navbtns { width: 100%; }
+  .id { gap: 22px; }
+  dialog.panel { width: 100vw; max-height: 100dvh; height: 100dvh; margin: 0; border-radius: 0; border-width: 0; background: #060a07; }
+  .panel-body { padding: 18px; }
+  .panel-skills .radar-box { width: min(100%, calc(100dvh - 160px)); }
+  #panel-exp .timeline { padding-left: 28px; }
+  #panel-exp .xp::before { left: -25px; }
+  #panel-exp .timeline::before { left: 6px; }
+  #panel-exp .packet { left: 1px; }
 }
 .proj { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1), border-color .25s; }
 .proj.in:hover { border-color: rgba(93, 214, 44, 0.55); }
@@ -303,10 +354,11 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
         <span>GitHub</span>
       </a>
     </div>
-    <div class="radar-box">
-      <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
-      <div class="radar-status" id="radar-status" aria-hidden="true">SCANNING FOR SKILLS</div>
-    </div>
+    <nav class="navbtns" aria-label="About me">
+      <button class="navbtn" type="button" data-open="panel-skills"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" /><circle cx="8" cy="8" r="3" /><path d="M8 8 13 3.5" /><circle class="dot" cx="10.6" cy="6" r="1" /></svg><span>Skills</span></button>
+      <button class="navbtn" type="button" data-open="panel-exp"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.8" y="5" width="12.4" height="8.6" rx="1" /><path d="M5.8 5V3.2h4.4V5M1.8 8.6h12.4" /></svg><span>Experience</span></button>
+      <button class="navbtn" type="button" data-open="panel-me"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.2" r="2.8" /><path d="M2.6 14.2c.6-3 2.8-4.6 5.4-4.6s4.8 1.6 5.4 4.6" /></svg><span>Who am I</span></button>
+    </nav>
   </aside>
 
 </div>
@@ -314,40 +366,9 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 
 
 <div class="work" id="work">
-  <section aria-labelledby="exp-title">
-    <p class="eyebrow"><b>01</b> Where I&rsquo;ve worked</p>
-    <h2 class="sec-title" id="exp-title"><span data-decode>EXPERIENCE</span><span class="caret" aria-hidden="true"></span></h2>
-    <div class="timeline" id="timeline">
-      <span class="packet" aria-hidden="true"></span>
-      <article class="xp glass fx">
-        <div class="xp-head"><h3 data-decode>AdvoHQ</h3><span class="when">Jan 2026 &ndash; Present</span></div>
-        <div class="title">Software Development Intern &middot; Bangalore</div>
-        <ul>
-          <li>Develop backend and frontend features for an AI-powered legal technology platform covering case, document and client management.</li>
-          <li>Deploy the frontend and the Dockerised backend as separate services on Render with Supabase PostgreSQL.</li>
-        </ul>
-      </article>
-      <article class="xp glass fx">
-        <div class="xp-head"><h3 data-decode>NanoFarm</h3><span class="when">Oct 2025 &ndash; Jan 2026</span></div>
-        <div class="title">Software Development Intern &middot; Bangalore</div>
-        <ul>
-          <li>Built and enhanced application features and integrated third-party APIs into production workflows.</li>
-          <li>Improved application performance through code optimisation and feature refinement.</li>
-        </ul>
-      </article>
-      <article class="xp glass fx">
-        <div class="xp-head"><h3 data-decode>Edutainer</h3><span class="when">Feb 2025 &ndash; May 2025</span></div>
-        <div class="title">Software Development Intern &middot; Bangalore</div>
-        <ul>
-          <li>Developed and maintained full-stack web applications for client projects using HTML, CSS, JavaScript and Node.js.</li>
-          <li>Implemented responsive frontend interfaces and backend REST APIs.</li>
-        </ul>
-      </article>
-    </div>
-  </section>
 
   <section aria-labelledby="proj-title" id="projects">
-    <p class="eyebrow"><b>02</b> Things I&rsquo;ve built</p>
+    <p class="eyebrow"><b>01</b> Things I&rsquo;ve built</p>
     <h2 class="sec-title" id="proj-title"><span data-decode>PROJECTS</span><span class="caret" aria-hidden="true"></span></h2>
     <div class="projects">
       <article class="proj wide glass fx">
@@ -415,6 +436,65 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
   </section>
 </div>
 
+
+<dialog class="panel panel-skills" id="panel-skills" aria-labelledby="panel-skills-t">
+  <div class="panel-bar">
+    <h2 id="panel-skills-t">Skills</h2>
+    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
+  </div>
+  <div class="panel-body">
+    <div class="radar-box">
+      <canvas id="radar" role="img" aria-label="A green radar screen whose sweep finds my skills one by one: Python, Java, JavaScript, SQL, C, C++, React.js, Node.js, REST APIs, HTML, CSS, PostgreSQL, MySQL, Supabase, AWS, Google Cloud, Vercel, Render, Git, GitHub, Power BI, Excel, PowerPoint, Canva and Photoshop"></canvas>
+      <div class="radar-status" id="radar-status" aria-hidden="true">SCANNING FOR SKILLS</div>
+    </div>
+  </div>
+</dialog>
+<dialog class="panel" id="panel-exp" aria-labelledby="panel-exp-t">
+  <div class="panel-bar">
+    <h2 id="panel-exp-t">Experience</h2>
+    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
+  </div>
+  <div class="panel-body">
+  <section aria-labelledby="exp-title">
+    <h2 class="sec-title sr-only" id="exp-title"><span data-decode>EXPERIENCE</span><span class="caret" aria-hidden="true"></span></h2>
+    <div class="timeline" id="timeline">
+      <span class="packet" aria-hidden="true"></span>
+      <article class="xp glass fx">
+        <div class="xp-head"><h3 data-decode>AdvoHQ</h3><span class="when">Jan 2026 &ndash; Present</span></div>
+        <div class="title">Software Development Intern &middot; Bangalore</div>
+        <ul>
+          <li>Develop backend and frontend features for an AI-powered legal technology platform covering case, document and client management.</li>
+          <li>Deploy the frontend and the Dockerised backend as separate services on Render with Supabase PostgreSQL.</li>
+        </ul>
+      </article>
+      <article class="xp glass fx">
+        <div class="xp-head"><h3 data-decode>NanoFarm</h3><span class="when">Oct 2025 &ndash; Jan 2026</span></div>
+        <div class="title">Software Development Intern &middot; Bangalore</div>
+        <ul>
+          <li>Built and enhanced application features and integrated third-party APIs into production workflows.</li>
+          <li>Improved application performance through code optimisation and feature refinement.</li>
+        </ul>
+      </article>
+      <article class="xp glass fx">
+        <div class="xp-head"><h3 data-decode>Edutainer</h3><span class="when">Feb 2025 &ndash; May 2025</span></div>
+        <div class="title">Software Development Intern &middot; Bangalore</div>
+        <ul>
+          <li>Developed and maintained full-stack web applications for client projects using HTML, CSS, JavaScript and Node.js.</li>
+          <li>Implemented responsive frontend interfaces and backend REST APIs.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+  </div>
+</dialog>
+<dialog class="panel" id="panel-me" aria-labelledby="panel-me-t">
+  <div class="panel-bar">
+    <h2 id="panel-me-t">Who am I</h2>
+    <button class="panel-close" type="button" data-close>Close <kbd>Esc</kbd></button>
+  </div>
+  <div class="panel-body">
+  </div>
+</dialog>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Project image"><img alt=""></div>
 
@@ -751,8 +831,13 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     var cv = document.getElementById("radar"); if (!cv) return;
     var ctx = cv.getContext("2d"), still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     var S = 0, dpr = 1, base = null, visible = false, raf = 0, PERIOD = 6500, builtFor = "", scanStart = null, statusEl = document.getElementById("radar-status"), introAt = null;
-    // the dial sits on the first screen now, so the scan starts once the loader and intro are done
-    if (window.__loaderDone) introAt = performance.now(); else addEventListener("loader:done", function () { introAt = performance.now(); }, { once: true });   // one sweep every 6.5 s
+    // the dial lives in the Skills panel: every time the panel opens it re-sizes and scans afresh
+    window.__radarStart = function () {
+      size(true);
+      blips.forEach(function (b) { b.found = still; b.foundAt = 0; });
+      scanStart = null; introAt = performance.now() - 1000;          // the sweep starts ~0.5 s after opening
+      cancelAnimationFrame(raf); if (!still) raf = requestAnimationFrame(frame); else frame(performance.now());
+    };   // one sweep every 6.5 s
     // Seeded random numbers, so a rebuild (resize, fonts arriving, a phone's address bar)
     // lays the skills, terrain and speckle out exactly as before instead of jumping.
     function seeded(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
@@ -769,7 +854,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     // try spots spread round the dial and keep the first whose label box is clear.
     function placeBlips() {
       var rnd = seeded(2026);
-      var c = S / 2, R = S * 0.475, fs = Math.max(9, S * 0.034), boxes = [];
+      var c = S / 2, R = S * 0.475, fs = Math.max(11, Math.min(15, S * 0.026)), boxes = [];
       var m = document.createElement("canvas").getContext("2d");
       m.font = "500 " + fs + "px 'IBM Plex Mono', monospace";
       blips.forEach(function (b, i) {
@@ -905,13 +990,17 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
       // scanlines, vignette and centre glow over everything inside
       if (crt) ctx.drawImage(crt, 0, 0, S, S);
       // skill targets: found on the first pass, then lit up again on every pass
-      var fs = Math.max(9, S * 0.034), found = 0;
+      var fs = Math.max(11, Math.min(15, S * 0.026)), found = 0;
       ctx.font = "500 " + fs + "px 'IBM Plex Mono', monospace"; ctx.textBaseline = "middle";
       blips.forEach(function (b) {
         var ang = b.a - Math.PI / 2;
         var age = ((sweep - ang) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
         var hit = still ? 0 : Math.max(0, 1 - age / (Math.PI * 1.3));          // 1 the moment the sweep passes
-        if (!b.found && scanStart !== null && age < 0.12) { b.found = true; b.foundAt = now; }
+        // found once the sweep has passed it: works however few frames are drawn (slow phones, throttled tabs)
+        if (!b.found && scanStart !== null) {
+          var turned = (now - scanStart) / PERIOD * Math.PI * 2, at = ((b.a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+          if (turned >= at) { b.found = true; b.foundAt = now; }
+        }
         if (!b.found) return;
         found++;
         var x = c + Math.cos(ang) * R * b.r, y = c + Math.sin(ang) * R * b.r;
@@ -932,7 +1021,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
         var left = x > c;
         ctx.textAlign = left ? "right" : "left";
         // on the small dial a name only shows while the sweep lights it, so they don't crowd each other
-        var nameAlpha = Math.max(hit, fresh);
+        var nameAlpha = S < 420 ? Math.max(hit, fresh) : Math.max(hit, fresh, 0.62);   // a big dial keeps found names on screen
         ctx.fillStyle = "rgba(216, 255, 196," + nameAlpha.toFixed(3) + ")";
         var label = fresh > 0 ? b.name.slice(0, Math.ceil(b.name.length * Math.min(1, (1 - fresh) * 2.5 + 0.1))) : b.name;  // types itself out
         if (nameAlpha > 0.03) ctx.fillText(label, x + (left ? -1 : 1) * (box + S * 0.012), y);
@@ -1063,30 +1152,47 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
         if (!e.isIntersecting) return;
         var el = e.target; io.unobserve(el);
         if (el.matches("[data-decode]")) { decode(el); return; }
-        el.querySelectorAll("li").forEach(function (li, k) { li.style.transitionDelay = (0.25 + k * 0.09) + "s"; });
-        el.querySelectorAll(".chips span").forEach(function (c, k) { c.style.transitionDelay = (0.45 + k * 0.06) + "s"; });
-        el.classList.add("in");
-        el.querySelectorAll("[data-decode]").forEach(function (d) { setTimeout(function () { decode(d); }, 150); });
+        reveal(el);
       });
     }, { threshold: 0.18, rootMargin: "0px 0px -8% 0px" });
+    function reveal(el) {
+      if (el.classList.contains("in")) return;
+      el.querySelectorAll("li").forEach(function (li, k) { li.style.transitionDelay = (0.25 + k * 0.09) + "s"; });
+      el.querySelectorAll(".chips span").forEach(function (c, k) { c.style.transitionDelay = (0.45 + k * 0.06) + "s"; });
+      el.classList.add("in");
+      el.querySelectorAll("[data-decode]").forEach(function (d) { setTimeout(function () { decode(d); }, 150); });
+    }
     document.querySelectorAll(".work .fx").forEach(function (el) { io.observe(el); });
     document.querySelectorAll(".sec-title [data-decode]").forEach(function (el) { io.observe(el); });
 
     // timeline line grows with the scroll
     var tl = document.getElementById("timeline");
-    // a signal travels down the line with the scroll; each role's node lights up as it arrives
     var roles = tl ? Array.prototype.slice.call(tl.querySelectorAll(".xp")) : [];
-    function grow() {
-      if (!tl) return;
-      var r = tl.getBoundingClientRect(), v = Math.max(0, Math.min(1, calm ? 1 : (innerHeight * 0.62 - r.top) / r.height));
+    function setLine(v) {
       tl.style.setProperty("--line", v.toFixed(4));
-      tl.style.setProperty("--packet", calm || v <= 0 || v >= 1 ? "0" : "1");
+      tl.style.setProperty("--packet", v > 0 && v < 1 ? "1" : "0");
       roles.forEach(function (el) {
-        var at = (el.offsetTop + 35) / tl.offsetHeight;          // where this role's node sits on the line
-        el.classList.toggle("lit", calm || v >= at);
+        var on = v >= (el.offsetTop + 35) / tl.offsetHeight;
+        el.classList.toggle("lit", on);
+        if (on) reveal(el);                       // each card rises in as the signal reaches it
       });
     }
-    addEventListener("scroll", grow, { passive: true }); addEventListener("resize", grow); grow();
+    // a signal runs down the line when the panel opens, lighting each role as it arrives
+    window.__timelineRun = function () {
+      if (!tl) return;
+      if (calm) { setLine(1); return; }
+      var t0 = performance.now(), D = 1700;
+      roles.forEach(function (el) {                // replay the reveal each time the panel opens
+        el.classList.remove("in");
+        el.querySelectorAll("[data-decode]").forEach(function (d) { if (d.getAttribute("data-final")) d.textContent = d.getAttribute("data-final"); });
+      });
+      setLine(0);
+      (function step(now) {
+        var t = Math.min(1, (now - t0 - 250) / D); t = t < 0 ? 0 : t;
+        setLine(t * t * (3 - 2 * t));
+        if (t < 1) requestAnimationFrame(step);
+      })(t0);
+    };
 
     // tilt: the screenshot leans toward the pointer, with a glare that follows it
     if (!calm && matchMedia("(pointer: fine)").matches) {
@@ -1109,6 +1215,28 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
     });
     lb.addEventListener("click", function () { lb.classList.remove("open"); });
     addEventListener("keydown", function (e) { if (e.key === "Escape") lb.classList.remove("open"); });
+  })();
+</script>
+<script>
+  // Section buttons open their panel; Esc, the Close button or a click outside closes it.
+  (function () {
+    var root = document.documentElement, opener = null;
+    document.querySelectorAll("[data-open]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var d = document.getElementById(btn.getAttribute("data-open"));
+        if (!d || d.open) return;
+        opener = btn; d.showModal(); root.classList.add("panel-open");
+        d.querySelector(".panel-body").scrollTop = 0;
+        requestAnimationFrame(function () {
+          if (d.id === "panel-skills" && window.__radarStart) window.__radarStart();
+          if (d.id === "panel-exp" && window.__timelineRun) window.__timelineRun();
+        });
+      });
+    });
+    document.querySelectorAll("dialog.panel").forEach(function (d) {
+      d.addEventListener("close", function () { root.classList.remove("panel-open"); if (opener) opener.focus(); });
+      d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
+    });
   })();
 </script>
 <script src="js/gsap.min.js"></script>
