@@ -249,18 +249,31 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
 .skills-found { display: grid; gap: 14px; }
 .found-title { margin: 0; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.06em; color: var(--muted); }
 .tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-.skill-tile { display: grid; justify-items: center; gap: 4px; padding: 7px 3px 6px; border-radius: 9px; min-width: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02)), #0c110e;
-  border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-  transition: border-color .25s, box-shadow .25s, transform .2s; }
-.skill-tile svg { width: 20px; height: 20px; }
-.skill-tile span { font-family: var(--mono); font-size: 0.56rem; line-height: 1.2; color: #e8efe6; text-align: center; max-width: 100%; overflow-wrap: anywhere; }
-.skill-tile { align-content: start; }
-.skill-tile:hover { transform: translateY(-2px); border-color: var(--c); box-shadow: 0 0 18px -6px var(--c); }
-.tiles.scan .skill-tile { opacity: 0.12; filter: grayscale(1); transform: scale(0.92); }
-.tiles.scan .skill-tile.hit { opacity: 1; filter: none; transform: none; border-color: var(--c); box-shadow: 0 0 22px -6px var(--c);
-  transition: opacity .3s, filter .3s, transform .35s cubic-bezier(.3,1.6,.5,1), border-color .6s, box-shadow .6s; }
-.tiles.scan .skill-tile.hit.settled { border-color: rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+/* glass tiles: a see-through frosted face, a light rim, a top highlight and a sheen that follows the cursor */
+.skill-tile { position: relative; display: grid; justify-items: center; align-content: start; gap: 4px; padding: 7px 3px 6px; border-radius: 10px; min-width: 0;
+  background: linear-gradient(150deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04) 42%, rgba(255,255,255,0.07)), rgba(12, 18, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(10px) saturate(150%); backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.35), 0 6px 14px rgba(0,0,0,0.45);
+  transform-style: preserve-3d; will-change: transform, translate;
+  transition: border-color .3s, box-shadow .3s, transform .45s cubic-bezier(.2,.8,.2,1), translate .45s cubic-bezier(.2,.8,.2,1), scale .35s; }
+.skill-tile::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%), rgba(255,255,255,0.35), transparent 60%); }
+.skill-tile svg { position: relative; width: 20px; height: 20px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+.skill-tile span { position: relative; font-family: var(--mono); font-size: 0.56rem; line-height: 1.2; color: #e8efe6; text-align: center; max-width: 100%; overflow-wrap: anywhere; }
+/* floating: while the cursor is on a tile it lifts, bobs gently and tilts toward the pointer */
+.skill-tile:hover { translate: 0 -7px; scale: 1.08; z-index: 2; border-color: var(--c);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 20px -4px var(--c), 0 16px 22px -6px rgba(0,0,0,0.7);
+  animation: tile-float 2.4s ease-in-out .45s infinite; }
+.skill-tile:hover::before { opacity: 1; }
+.skill-tile:hover svg { transform: translateZ(14px) scale(1.12); }
+@keyframes tile-float { 0%, 100% { translate: 0 -7px; } 50% { translate: 0 -11px; } }
+.tiles.scan .skill-tile { opacity: 0.12; filter: grayscale(1); scale: 0.92; }
+.tiles.scan .skill-tile.hit { opacity: 1; filter: none; scale: 1; border-color: var(--c); box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 0 22px -6px var(--c), 0 6px 14px rgba(0,0,0,0.45);
+  transition: opacity .3s, filter .3s, scale .35s cubic-bezier(.3,1.6,.5,1), border-color .6s, box-shadow .6s, transform .45s cubic-bezier(.2,.8,.2,1), translate .45s cubic-bezier(.2,.8,.2,1); }
+.tiles.scan .skill-tile.hit.settled { border-color: rgba(255, 255, 255, 0.16); box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.35), 0 6px 14px rgba(0,0,0,0.45); }
+.tiles.scan .skill-tile.hit:hover { scale: 1.08; border-color: var(--c); box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 20px -4px var(--c), 0 16px 22px -6px rgba(0,0,0,0.7); }
+@media (prefers-reduced-motion: reduce) { .skill-tile:hover { animation: none; } }
 @media (max-width: 900px) {
   .panel-skills .panel-body { grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; }
   .skills-found { width: min(100%, 520px); }
@@ -1278,6 +1291,18 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
         if (t < 1) requestAnimationFrame(step);
       })(t0);
     };
+
+    // skill tiles: lean toward the pointer while it moves over them, sheen follows it
+    if (!calm && matchMedia("(pointer: fine)").matches) {
+      document.querySelectorAll(".skill-tile").forEach(function (t) {
+        t.addEventListener("pointermove", function (e) {
+          var r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+          t.style.transform = "perspective(420px) rotateX(" + ((0.5 - y) * 22).toFixed(1) + "deg) rotateY(" + ((x - 0.5) * 22).toFixed(1) + "deg)";
+          t.style.setProperty("--gx", (x * 100).toFixed(0) + "%"); t.style.setProperty("--gy", (y * 100).toFixed(0) + "%");
+        });
+        t.addEventListener("pointerleave", function () { t.style.transform = ""; });
+      });
+    }
 
     // tilt: the screenshot leans toward the pointer, with a glare that follows it
     if (!calm && matchMedia("(pointer: fine)").matches) {
