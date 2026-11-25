@@ -287,6 +287,7 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.82); }
 .shot-portrait img { object-position: center 18%; }   /* a tall photo: keep the faces and plaques in frame */
 @media (max-width: 820px) { .panel-proj .projects { gap: 18px; } }
 
+#trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
 /* Lightbox for project images */
 dialog.lightbox { padding: 0; margin: auto; border: 0; background: transparent; max-width: none; max-height: none; cursor: zoom-out; overflow: visible; }
 dialog.lightbox::backdrop { background: rgba(0, 0, 0, 0.88); }
@@ -1319,6 +1320,60 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
       d.addEventListener("close", function () { root.classList.remove("panel-open"); if (opener) opener.focus(); });
       d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
     });
+  })();
+</script>
+<script>
+  // Cursor trail: a glowing green streak follows the pointer and sheds little 0s and 1s that
+  // drift down and fade. Mouse/trackpad only; off for reduced motion. Sleeps when the pointer stops.
+  (function () {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
+    var cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+    cv.id = "trail"; cv.setAttribute("aria-hidden", "true"); document.body.appendChild(cv);
+    var dpr = 1, W = 0, H = 0, pts = [], bits = [], running = false, last = null;
+    function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    size(); addEventListener("resize", size);
+    addEventListener("pointermove", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      var now = performance.now(), p = { x: e.clientX, y: e.clientY, t: now };
+      if (last) {
+        var d = Math.hypot(p.x - last.x, p.y - last.y), n = Math.min(6, Math.floor(d / 6));
+        for (var k = 1; k <= n; k++) pts.push({ x: last.x + (p.x - last.x) * k / (n + 1), y: last.y + (p.y - last.y) * k / (n + 1), t: now });
+        if (d > 3 && Math.random() < Math.min(0.9, d / 40))
+          bits.push({ x: p.x + (Math.random() - 0.5) * 10, y: p.y + (Math.random() - 0.5) * 10, vy: 0.4 + Math.random() * 0.9, vx: (Math.random() - 0.5) * 0.4,
+                      ch: Math.random() < 0.5 ? "0" : "1", t: now, life: 650 + Math.random() * 500, size: 10 + Math.random() * 5 });
+      }
+      pts.push(p); last = p;
+      if (!running) { running = true; requestAnimationFrame(frame); }
+    }, { passive: true });
+    addEventListener("pointerleave", function () { last = null; });
+    document.addEventListener("mouseleave", function () { last = null; });
+    var TRAIL = 260;                                    // ms of streak behind the cursor
+    function frame(now) {
+      ctx.clearRect(0, 0, W, H);
+      while (pts.length && now - pts[0].t > TRAIL) pts.shift();
+      // the streak: thin at the tail, bright and thick at the cursor
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      for (var i = 1; i < pts.length; i++) {
+        var a = pts[i - 1], b = pts[i], f = 1 - (now - b.t) / TRAIL;
+        if (f <= 0) continue;
+        ctx.strokeStyle = "rgba(93, 214, 44," + (0.55 * f).toFixed(3) + ")";
+        ctx.shadowColor = "rgba(93, 214, 44, 0.9)"; ctx.shadowBlur = 10 * f;
+        ctx.lineWidth = 0.6 + 3.4 * f;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      // the shed digits
+      ctx.font = "600 12px 'IBM Plex Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      bits = bits.filter(function (d) { return now - d.t < d.life; });
+      bits.forEach(function (d) {
+        var age = (now - d.t) / d.life;
+        d.x += d.vx; d.y += d.vy; d.vy += 0.03;
+        ctx.font = "600 " + d.size.toFixed(0) + "px 'IBM Plex Mono', monospace";
+        ctx.fillStyle = age < 0.15 ? "rgba(216, 255, 196," + (1 - age) + ")" : "rgba(93, 214, 44," + (1 - age).toFixed(3) + ")";
+        ctx.fillText(d.ch, d.x, d.y);
+      });
+      if (pts.length > 1 || bits.length) requestAnimationFrame(frame); else { running = false; ctx.clearRect(0, 0, W, H); }
+    }
   })();
 </script>
 <script src="js/gsap.min.js"></script>
