@@ -250,6 +250,8 @@ dialog.panel::backdrop { background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(
 @media (prefers-reduced-motion: reduce) { dialog.panel[open], dialog.panel[open]::after { animation: none; } }
 
 .panel-proj .projects { max-width: 1040px; margin: 0 auto; }
+.shot-portrait { aspect-ratio: 1 / 1; }
+.shot-portrait img { object-position: center 18%; }   /* a tall photo: keep the faces and plaques in frame */
 @media (max-width: 820px) { .panel-proj .projects { gap: 18px; } }
 
 /* Lightbox for project images */
@@ -483,6 +485,20 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
           <ul>
             <li>Analysed Landsat satellite imagery with image-processing techniques to map tree plantation areas.</li>
             <li>Estimated carbon emissions for the mapped areas.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="proj wide glass fx">
+        <div class="win-bar" aria-hidden="true"><i></i><i></i><i></i><span>solid-water &middot; fkcci manthan 2025</span></div>
+        <figure class="shot shot-portrait"><img src="img/projects/solidwater.webp" alt="The Solid Water team at the FKCCI Manthan 2025 grand finale, holding the second-prize plaques, certificates and a Rs 2,00,000 cheque" loading="lazy" width="876" height="1280"><figcaption>2nd prize &middot; FKCCI Manthan 2025</figcaption></figure>
+        <div class="proj-body">
+          <div class="kind">Agri-tech &middot; Award</div>
+          <h3 data-decode>Solid Water</h3>
+          <div class="chips"><span>Product design</span><span>Agri-tech</span><span>Business plan</span></div>
+          <ul>
+            <li>A soil water-retention product for farmers: gel beads, like silica gel balls, that hold about 80% water and release it slowly into the soil.</li>
+            <li>Helps crops grow with less dependence on rainfall.</li>
+            <li>Won 2nd prize and &#8377;2 lakh at the FKCCI Manthan 2025 business plan presentation, and 1st place at the SJBIT College of Engineering Fest.</li>
           </ul>
         </div>
       </article>
