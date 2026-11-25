@@ -47,6 +47,10 @@ body {
 }
 a { color: var(--accent); text-underline-offset: 3px; }
 #bits, #head, #eyes { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#bits, #head, #eyes { display: none; }   /* replaced by the particle field */
+#field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 45% at 50% 62%, rgba(30, 140, 70, 0.14), transparent 70%); }
 .wrap { position: relative; z-index: 1; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 h1, h2, h3 { text-wrap: balance; margin: 0; }
@@ -89,7 +93,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .inbtn:hover .guy, .inbtn:focus-visible .guy { transform: translateY(-1px); }
 .inbtn:hover .tie, .inbtn:focus-visible .tie { transform: rotate(14deg); }
 /* Digital glitch: a faint green ghost always, stronger split and binary letters in bursts */
-.name { text-shadow: 2px 0 rgba(93, 214, 44, 0.28), -2px 0 rgba(26, 64, 41, 0.9); }
+.name { text-shadow: 0 0 18px rgba(60, 255, 130, 0.35), 0 0 42px rgba(40, 220, 110, 0.18), 2px 0 rgba(93, 214, 44, 0.25); }
 .name.jolt { text-shadow: 5px 0 rgba(93, 214, 44, 0.75), -4px 0 rgba(47, 214, 107, 0.45); }
 .name .glitching { color: #5dd62c; text-align: center; text-shadow: 0 0 10px rgba(93, 214, 44, 0.6); }
 .greet { margin: 0 0 12px; font-family: var(--display); font-size: clamp(0.95rem, 1.6vw, 1.25rem); letter-spacing: 0.12em; color: var(--accent); }
@@ -779,6 +783,7 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
       if (changed || moved) requestAnimationFrame(frame); else { running = false; prev = null; }
     }
     function onMove(e) {
+      if (cv.offsetParent === null) return;           // the 0s-and-1s canvas is retired (hidden)
       mx = e.clientX; my = e.clientY; moved = true;
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
@@ -801,7 +806,7 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
 
     // Idle flicker (paused while a panel covers the page)
     setInterval(function () {
-      if (document.hidden || document.documentElement.classList.contains("panel-open")) return;
+      if (document.hidden || document.documentElement.classList.contains("panel-open") || cv.offsetParent === null) return;
       for (var n = 0; n < 16; n++) {
         var i = Math.floor(Math.random() * cells.length), c = cells[i];
         if (!c) continue;                     // mid-rebuild after a resize
@@ -1360,6 +1365,119 @@ dialog.lightbox[open] { animation: panel-in .35s cubic-bezier(.2,.8,.2,1); }
       ctx.shadowBlur = 0;
       if (pts.length > 1) requestAnimationFrame(frame); else { running = false; ctx.clearRect(0, 0, W, H); }
     }
+  })();
+</script>
+<script>
+  // Particle field: a floor of glowing green points receding to the horizon, with depth of field
+  // (far points small and crisp, near points large soft bokeh), a slow swell, drifting motes, and a
+  // ripple that spreads from wherever the cursor or a finger touches the floor. The view leans with
+  // the mouse. Paused while a panel is open or the tab is hidden; still for reduced motion.
+  (function () {
+    var cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+    cv.id = "field"; cv.setAttribute("aria-hidden", "true"); document.body.insertBefore(cv, document.body.firstChild);
+    var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var W = 0, H = 0, dpr = 1, F = 1, HOR = 0, CAM = 1.15, raf = 0;
+    var COLS = 64, ROWS = 46, X0 = -15, X1 = 15, Z0 = 1.6, Z1 = 34;
+    var pts = [], motes = [], ripples = [], mouse = { x: 0.5, y: 0.5, sx: 0.5, sy: 0.5 };
+
+    // glow sprites: a crisp dot and progressively softer bokeh discs
+    var SPR = [];
+    function sprite(blur) {
+      var s = 64, c = document.createElement("canvas"); c.width = c.height = s;
+      var g = c.getContext("2d"), r = s / 2, grd = g.createRadialGradient(r, r, 0, r, r, r);
+      var core = Math.max(0.05, 0.42 - blur * 0.36);
+      grd.addColorStop(0, "rgba(210, 255, 220, 1)");
+      grd.addColorStop(core * 0.5, "rgba(120, 255, 160, 0.95)");
+      grd.addColorStop(core, "rgba(46, 230, 120, " + (0.75 - blur * 0.35) + ")");
+      grd.addColorStop(Math.min(0.98, core + 0.35 + blur * 0.3), "rgba(20, 200, 90, " + (0.18 - blur * 0.06) + ")");
+      grd.addColorStop(1, "rgba(20, 200, 90, 0)");
+      g.fillStyle = grd; g.fillRect(0, 0, s, s); return c;
+    }
+    for (var b = 0; b < 5; b++) SPR.push(sprite(b / 4));
+
+    function size() {
+      dpr = Math.min(devicePixelRatio || 1, 1.75); W = innerWidth; H = innerHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      F = Math.max(W, H * 1.2) * 0.62; HOR = H * (W < 700 ? 0.6 : 0.55);
+      var mobile = W < 700; COLS = mobile ? 40 : 64; ROWS = mobile ? 34 : 46;
+      pts = [];
+      for (var r = 0; r < ROWS; r++) {
+        var t = r / (ROWS - 1), z = Z0 * Math.pow(Z1 / Z0, t);          // rows closer together in the distance
+        for (var c = 0; c < COLS; c++) {
+          var x = X0 + (X1 - X0) * (c + (r % 2) * 0.5) / (COLS - 1);
+          pts.push({ x: x + (Math.random() - 0.5) * 0.12, z: z * (1 + (Math.random() - 0.5) * 0.03), tw: Math.random() * 6.28 });
+        }
+      }
+      motes = [];
+      for (var m = 0; m < (mobile ? 40 : 90); m++) motes.push({ x: (Math.random() - 0.5) * 24, y: -Math.random() * 3.2, z: 2 + Math.random() * 24, v: 0.002 + Math.random() * 0.006 });
+    }
+
+    // where a screen point lands on the floor (y = CAM below the eye)
+    function toFloor(sx, sy) {
+      if (sy <= HOR + 2) return null;
+      var z = CAM * F / (sy - HOR); return { x: (sx - W / 2) * z / F, z: z };
+    }
+    function addRipple(sx, sy, strength) {
+      var p = toFloor(sx, sy); if (!p) return;
+      ripples.push({ x: p.x, z: p.z, t: performance.now(), s: strength });
+      if (ripples.length > 8) ripples.shift();
+    }
+    var lastRip = 0;
+    addEventListener("pointermove", function (e) {
+      mouse.x = e.clientX / W; mouse.y = e.clientY / H;
+      var now = performance.now();
+      if (now - lastRip > 120) { lastRip = now; addRipple(e.clientX, e.clientY, 0.55); }
+    }, { passive: true });
+    addEventListener("pointerdown", function (e) { addRipple(e.clientX, e.clientY, 1.4); }, { passive: true });
+
+    function frame(now) {
+      raf = 0;
+      var t = still ? 0 : now / 1000;
+      mouse.sx += (mouse.x - mouse.sx) * 0.05; mouse.sy += (mouse.y - mouse.sy) * 0.05;
+      var camX = (mouse.sx - 0.5) * 1.6, hor = HOR + (mouse.sy - 0.5) * 30;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "lighter";
+      // the floor, far to near so near bokeh sits on top
+      for (var i = pts.length - 1; i >= 0; i--) {
+        var p = pts[i], z = p.z;
+        var h = 0.09 * Math.sin(p.x * 0.45 + t * 0.9) + 0.07 * Math.sin(z * 0.35 - t * 1.2);
+        for (var k = 0; k < ripples.length; k++) {
+          var rp = ripples[k], age = (now - rp.t) / 1000; if (age > 3.2) continue;
+          var d = Math.hypot(p.x - rp.x, z - rp.z), front = age * 4.2, band = d - front;
+          if (Math.abs(band) < 1.6) h += rp.s * 0.32 * Math.cos(band * 2.4) * Math.exp(-band * band * 0.9) * (1 - age / 3.2);
+        }
+        var sx = W / 2 + (p.x - camX) * F / z, sy = hor + (CAM - h) * F / z;
+        if (sx < -60 || sx > W + 60 || sy > H + 60) continue;
+        var near = 1 - (z - Z0) / (Z1 - Z0);                          // 1 near, 0 far
+        var fog = Math.min(1, z < 3 ? (z - Z0) / 1.4 + 0.25 : 1) * Math.pow(near, 0.55);
+        var tw = 0.75 + 0.25 * Math.sin(t * 2 + p.tw);
+        var lift = Math.max(0, h) * 2.2;                                 // crests glow brighter
+        var a = Math.min(1, (0.16 + 0.8 * fog) * tw + lift);
+        var blur = z < 4 ? Math.min(4, Math.round((4 - z) * 1.6)) : z > 22 ? 1 : 0;
+        var r = Math.max(1.1, F * 0.016 / z) * (1 + blur * 0.55);
+        ctx.globalAlpha = a;
+        ctx.drawImage(SPR[blur], sx - r * 2, sy - r * 2, r * 4, r * 4);
+      }
+      // drifting motes in the air above the floor
+      for (var m = 0; m < motes.length; m++) {
+        var o = motes[m];
+        if (!still) { o.y -= o.v; if (o.y < -3.6) { o.y = 0.2; o.x = (Math.random() - 0.5) * 24; o.z = 2 + Math.random() * 24; } }
+        var mx = W / 2 + (o.x - camX * 1.3) * F / o.z, my = hor + (CAM + o.y) * F / o.z;
+        var mr = Math.max(1, F * 0.012 / o.z) * (o.z < 5 ? 2.4 : 1);
+        ctx.globalAlpha = Math.min(0.7, 0.15 + 3 / o.z) * (0.6 + 0.4 * Math.sin(t * 1.7 + o.x));
+        ctx.drawImage(SPR[o.z < 5 ? 4 : 1], mx - mr * 2, my - mr * 2, mr * 4, mr * 4);
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+      ripples = ripples.filter(function (rp) { return now - rp.t < 3200; });
+      if (!still) loop();
+    }
+    function loop() {
+      if (raf) return;
+      if (document.hidden || document.documentElement.classList.contains("panel-open")) { setTimeout(loop, 400); return; }
+      raf = requestAnimationFrame(frame);
+    }
+    size(); addEventListener("resize", function () { size(); if (still) frame(performance.now()); });
+    if (still) frame(performance.now()); else loop();
   })();
 </script>
 <script src="js/gsap.min.js"></script>
